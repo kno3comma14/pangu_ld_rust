@@ -39,12 +39,23 @@ fn initialize_testing_world() -> EditorWorld {
     let carving_sphere = Brush {
         primitive: BrushPrimitive::Sphere {
             radius: 1.3,
-            subdivisions: 32,
+            subdivisions: 4,
         },
         mode: BrushMode::Subtractive,
         transform: Transform::IDENTITY.with_scale(vec3(0.9, 0.9, 0.9)),
     };
     world.add_brush(carving_sphere);
+
+    let torus = Brush {
+        primitive: BrushPrimitive::Torus {
+            major_radius: 10.0,
+            minor_radius: 2.0,
+            segments: 32,
+        },
+        mode: BrushMode::Additive,
+        transform: Transform::IDENTITY,
+    };
+    world.add_brush(torus);
 
     world
 }

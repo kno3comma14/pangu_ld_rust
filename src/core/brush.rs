@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use manifold_csg::Manifold;
+use manifold_csg::{CrossSection, Manifold};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BrushPrimitive {
@@ -13,8 +13,9 @@ pub enum BrushPrimitive {
     },
 
     Cylinder {
-        radius: f32,
         height: f32,
+        radius_low: f32,
+        radius_high: f32,
         segments: i32,
     },
 
@@ -23,6 +24,15 @@ pub enum BrushPrimitive {
         height: f32,
         segments: i32,
     },
+
+    Torus {
+        major_radius: f32,
+        minor_radius: f32,
+        segments: i32,
+    },
+
+    Tetrahedron,
+
     World,
 }
 
@@ -76,10 +86,47 @@ impl Brush {
         }
     }
 
+    pub fn new_cylinder(
+        height: f32,
+        radius_low: f32,
+        radius_high: f32,
+        segments: i32,
+        mode: BrushMode,
+        transform: Transform,
+    ) -> Self {
+        Self {
+            primitive: BrushPrimitive::Cylinder {
+                height,
+                radius_low,
+                radius_high,
+                segments,
+            },
+            mode,
+            transform,
+        }
+    }
+
+    pub fn new_torus(
+        major_radius: f32,
+        minor_radius: f32,
+        segments: i32,
+        mode: BrushMode,
+        transform: Transform,
+    ) -> Self {
+        Self {
+            primitive: BrushPrimitive::Torus {
+                major_radius,
+                minor_radius,
+                segments,
+            },
+            mode,
+            transform,
+        }
+    }
+
     pub fn to_manifold(&self) -> Manifold {
         match self.primitive {
             BrushPrimitive::Cube { size } => {
-                // manifold-csg: (x, y, z, center)
                 Manifold::cube(size.x as f64, size.y as f64, size.z as f64, true)
             }
             BrushPrimitive::Sphere {
@@ -90,16 +137,34 @@ impl Brush {
                 Manifold::sphere(radius as f64, subdivisions)
             }
             BrushPrimitive::Cylinder {
-                radius,
                 height,
+                radius_low,
+                radius_high,
                 segments,
-            } => Manifold::cylinder(height as f64, radius as f64, radius as f64, segments, true),
+            } => Manifold::cylinder(
+                height as f64,
+                radius_low as f64,
+                radius_high as f64,
+                segments,
+                true,
+            ),
             BrushPrimitive::Cone {
                 radius,
                 height,
                 segments,
             } => Manifold::cylinder(height as f64, radius as f64, 0.0, segments, true),
+            BrushPrimitive::Torus {
+                major_radius,
+                minor_radius,
+                segments,
+            } => {
+                let circle = CrossSection::circle(minor_radius as f64, segments);
+                let offset_circle = circle.translate(major_radius as f64, 0.0);
+                let torus = Manifold::revolve(&offset_circle, segments, 360.0);
+                torus
+            }
             BrushPrimitive::World => Manifold::empty(),
+            BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
         }
     }
 }
