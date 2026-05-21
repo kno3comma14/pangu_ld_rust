@@ -1,4 +1,4 @@
-use bevy::camera_controller::pan_camera::{PanCamera, PanCameraPlugin};
+use bevy::camera_controller::free_camera::{FreeCamera, FreeCameraPlugin};
 use bevy::prelude::*;
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
 
@@ -16,7 +16,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(PanCameraPlugin)
+        .add_plugins(FreeCameraPlugin)
         .add_plugins(InfiniteGridPlugin)
         .add_plugins(RenderEnginePlugin)
         .insert_resource(initialize_testing_world())
@@ -55,11 +55,6 @@ fn setup_editor_workspace(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(4.0, 5.0, 6.0).looking_at(Vec3::ZERO, Vec3::Y),
-        PanCamera {
-            pan_speed: 15.0,
-            zoom_speed: 0.05,
-            rotation_speed: 1.0,
-            ..default()
-        },
+        FreeCamera::default(),
     ));
 }

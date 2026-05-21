@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.18.1", features = ["pan_camera"] }
+bevy = { version = "0.18.1", features = ["pan_camera", "free_camera"] }
 manifold-csg = "=0.1.8"
 bevy_infinite_grid = "0.18.0"
