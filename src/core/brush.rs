@@ -95,21 +95,21 @@ impl Brush {
             BrushPrimitive::Empty => Manifold::empty(),
             BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
         };
-        m = m.translate(
-            transform.translation.x as f64,
-            transform.translation.y as f64,
-            transform.translation.z as f64,
-        );
-        m = m.rotate(
-            transform.rotation.x as f64,
-            transform.rotation.y as f64,
-            transform.rotation.z as f64,
-        );
-        m = m.scale(
-            transform.scale.x as f64,
-            transform.scale.y as f64,
-            transform.scale.z as f64,
-        );
+        // m = m.translate(
+        //     transform.translation.x as f64,
+        //     transform.translation.y as f64,
+        //     transform.translation.z as f64,
+        // );
+        // m = m.rotate(
+        //     transform.rotation.x as f64,
+        //     transform.rotation.y as f64,
+        //     transform.rotation.z as f64,
+        // );
+        // m = m.scale(
+        //     transform.scale.x as f64,
+        //     transform.scale.y as f64,
+        //     transform.scale.z as f64,
+        // );
         Self {
             manifold: m,
             mode,

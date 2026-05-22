@@ -12,6 +12,8 @@ pub struct EditorWorld {
     pub needs_rebuild: bool,
 
     pub grid_snap: f32,
+
+    pub grid_height: f32,
 }
 
 impl Default for EditorWorld {
@@ -26,6 +28,7 @@ impl Default for EditorWorld {
             selected_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
+            grid_height: 0.0,
         }
     }
 }
@@ -42,6 +45,7 @@ impl EditorWorld {
             selected_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
+            grid_height: 0.0,
         }
     }
 
@@ -74,7 +78,8 @@ impl EditorWorld {
     pub fn add_brush(&mut self, brush: Brush) {
         self.brushes.push(brush.clone());
         self.apply_brush(brush);
-        //self.needs_rebuild = true;
+        self.rebuild();
+        self.needs_rebuild = true;
     }
 
     pub fn remove_brush(&mut self, index: usize) {
