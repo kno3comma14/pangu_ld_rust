@@ -27,34 +27,34 @@ fn main() {
 fn initialize_testing_world() -> EditorWorld {
     let mut world = EditorWorld::new();
 
-    let base_cube = Brush {
-        primitive: BrushPrimitive::Cube {
+    let base_cube = Brush::new(
+        BrushPrimitive::Cube {
             size: Vec3::splat(2.0),
         },
-        mode: BrushMode::Additive,
-        transform: Transform::IDENTITY,
-    };
+        BrushMode::Additive,
+        Transform::IDENTITY,
+    );
     world.add_brush(base_cube);
 
-    let carving_sphere = Brush {
-        primitive: BrushPrimitive::Sphere {
+    let carving_shpere = Brush::new(
+        BrushPrimitive::Sphere {
             radius: 1.3,
-            subdivisions: 4,
+            subdivisions: 32,
         },
-        mode: BrushMode::Subtractive,
-        transform: Transform::IDENTITY.with_scale(vec3(0.9, 0.9, 0.9)),
-    };
-    world.add_brush(carving_sphere);
+        BrushMode::Subtractive,
+        Transform::IDENTITY,
+    );
+    world.add_brush(carving_shpere);
 
-    let torus = Brush {
-        primitive: BrushPrimitive::Torus {
+    let torus = Brush::new(
+        BrushPrimitive::Torus {
             major_radius: 10.0,
-            minor_radius: 2.0,
+            minor_radius: 9.0,
             segments: 32,
         },
-        mode: BrushMode::Additive,
-        transform: Transform::IDENTITY,
-    };
+        BrushMode::Additive,
+        Transform::IDENTITY,
+    );
     world.add_brush(torus);
 
     world

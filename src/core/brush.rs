@@ -34,6 +34,7 @@ pub enum BrushPrimitive {
     Tetrahedron,
 
     World,
+    Empty,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -46,7 +47,7 @@ pub enum BrushMode {
 
 #[derive(Component, Debug, Clone)]
 pub struct Brush {
-    pub primitive: BrushPrimitive,
+    pub manifold: Manifold,
 
     pub mode: BrushMode,
 
@@ -54,88 +55,15 @@ pub struct Brush {
 }
 
 impl Brush {
-    pub fn new_cube(size: Vec3, mode: BrushMode, transform: Transform) -> Self {
-        Self {
-            primitive: BrushPrimitive::Cube { size },
-            mode,
-            transform,
-        }
-    }
-
-    pub fn new_sphere(
-        radius: f32,
-        subdivisions: i32,
-        mode: BrushMode,
-        transform: Transform,
-    ) -> Self {
-        Self {
-            primitive: BrushPrimitive::Sphere {
-                radius,
-                subdivisions,
-            },
-            mode,
-            transform,
-        }
-    }
-
-    pub fn new_world() -> Self {
-        Self {
-            primitive: BrushPrimitive::World {},
-            mode: BrushMode::Additive,
-            transform: Transform::from_translation(vec3(0.0, 0.0, 0.0)),
-        }
-    }
-
-    pub fn new_cylinder(
-        height: f32,
-        radius_low: f32,
-        radius_high: f32,
-        segments: i32,
-        mode: BrushMode,
-        transform: Transform,
-    ) -> Self {
-        Self {
-            primitive: BrushPrimitive::Cylinder {
-                height,
-                radius_low,
-                radius_high,
-                segments,
-            },
-            mode,
-            transform,
-        }
-    }
-
-    pub fn new_torus(
-        major_radius: f32,
-        minor_radius: f32,
-        segments: i32,
-        mode: BrushMode,
-        transform: Transform,
-    ) -> Self {
-        Self {
-            primitive: BrushPrimitive::Torus {
-                major_radius,
-                minor_radius,
-                segments,
-            },
-            mode,
-            transform,
-        }
-    }
-
-    pub fn to_manifold(&self) -> Manifold {
-        match self.primitive {
+    pub fn new(primitive: BrushPrimitive, mode: BrushMode, transform: Transform) -> Brush {
+        let mut m = match primitive {
             BrushPrimitive::Cube { size } => {
                 Manifold::cube(size.x as f64, size.y as f64, size.z as f64, true)
             }
             BrushPrimitive::Sphere {
                 radius,
                 subdivisions,
-            } => {
-                // manifold-csg: (radius, segments)
-                Manifold::sphere(radius as f64, subdivisions)
-            }
+            } => Manifold::sphere(radius as f64, subdivisions),
             BrushPrimitive::Cylinder {
                 height,
                 radius_low,
@@ -158,13 +86,34 @@ impl Brush {
                 minor_radius,
                 segments,
             } => {
-                let circle = CrossSection::circle(minor_radius as f64, segments);
+                let circle = CrossSection::circle((major_radius - minor_radius) as f64, segments);
                 let offset_circle = circle.translate(major_radius as f64, 0.0);
                 let torus = Manifold::revolve(&offset_circle, segments, 360.0);
                 torus
             }
             BrushPrimitive::World => Manifold::empty(),
+            BrushPrimitive::Empty => Manifold::empty(),
             BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
+        };
+        m = m.translate(
+            transform.translation.x as f64,
+            transform.translation.y as f64,
+            transform.translation.z as f64,
+        );
+        m = m.rotate(
+            transform.rotation.x as f64,
+            transform.rotation.y as f64,
+            transform.rotation.z as f64,
+        );
+        m = m.scale(
+            transform.scale.x as f64,
+            transform.scale.y as f64,
+            transform.scale.z as f64,
+        );
+        Self {
+            manifold: m,
+            mode,
+            transform,
         }
     }
 }

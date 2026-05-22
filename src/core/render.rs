@@ -21,12 +21,6 @@ fn setup_render_environment(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // commands.insert_resource(AmbientLight {
-    //     color: Color::WHITE,
-    //     brightness: 600.0,
-    //     affects_lightmapped_meshes: true,
-    // });
-
     commands.spawn((
         DirectionalLight {
             shadows_enabled: true,
