@@ -71,7 +71,10 @@ fn rebuild_dirty_world_system(
                 bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
                 bevy_mesh.insert_indices(Indices::U32(indices));
 
-                bevy_mesh.duplicate_vertices();
+                if let Err(e) = bevy_mesh.try_duplicate_vertices() {
+                    eprintln!("Failed to duplicate vertices: {:?}", e);
+                    // Handle the failure gracefully (e.g., skip this mesh or log it)
+                }
                 let _ = bevy_mesh.compute_flat_normals();
             } else {
                 bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_POSITION);

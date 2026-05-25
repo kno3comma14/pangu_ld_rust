@@ -1,16 +1,12 @@
-use std::time::Instant;
-
-use bevy::audio::CpalSample;
 use bevy::camera_controller::free_camera::{FreeCamera, FreeCameraPlugin};
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
-use bevy::window::{PrimaryWindow, Window};
+use bevy::window::Window;
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
-use manifold_csg::Manifold;
 
 mod core;
 mod gui;
-use crate::core::brush::{Brush, BrushMode, BrushPrimitive};
+use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
 use crate::core::world::EditorWorld;
 
@@ -39,7 +35,6 @@ fn mouse_grid_raycast_system(
 
     let snap = world_state.grid_snap;
 
-    // Check height modification hotkeys
     let mut height_changed = false;
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         world_state.grid_height += snap;
@@ -52,7 +47,6 @@ fn mouse_grid_raycast_system(
 
     let current_grid_y = world_state.grid_height;
 
-    // FIX: Using .single_mut() maps cleanly to modern Bevy's API expectations
     if height_changed {
         if let Ok(mut grid_transform) = grid_query.single_mut() {
             grid_transform.translation.y = current_grid_y;
@@ -93,14 +87,14 @@ fn mouse_grid_raycast_system(
 
                 let new_cube_brush = Brush::new(
                     BrushPrimitive::Cube {
-                        size: Vec3::splat(2.0),
+                        size: Vec3::splat(1.0),
                     },
-                    BrushMode::Subtractive,
+                    manifold_csg::OpType::Add,
                     spawn_transform,
                 );
 
                 world_state.add_brush(&new_cube_brush);
-                world_state.needs_rebuild = true;
+                world_state.apply_brush(&new_cube_brush);
             }
         }
     }
@@ -126,24 +120,18 @@ fn main() {
 
 fn initialize_testing_world() -> EditorWorld {
     let mut world = EditorWorld::new();
-
-    let mut i: u32 = 0;
-    let t0 = Instant::now();
-    while i < 10000 {
-        let bm = BrushMode::Additive;
-        let base_cube = Brush::new(
-            BrushPrimitive::Cube {
-                size: Vec3::splat(1.0),
-            },
-            bm,
-            Transform::IDENTITY.with_scale(vec3(6.0, 1.0, 6.0)),
-        );
-        world.add_brush(&base_cube);
-        i += 1;
-    }
-    let elapsed = t0.elapsed();
-    println!("elapsed: {:.3?}", elapsed);
-
+    let bm = manifold_csg::OpType::Add;
+    let base_cube = Brush::new(
+        BrushPrimitive::Cube { size: Vec3::ONE },
+        bm,
+        Transform::IDENTITY.with_scale(Vec3 {
+            x: 2.0,
+            y: 2.0,
+            z: 2.0,
+        }),
+    );
+    world.add_brush(&base_cube);
+    world.bake();
     world
 }
 
@@ -152,7 +140,7 @@ fn setup_editor_workspace(mut commands: Commands) {
 
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(4.0, 5.0, 6.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(12.0, 15.0, 18.0).looking_at(Vec3::ZERO, Vec3::Y),
         FreeCamera {
             mouse_key_cursor_grab: MouseButton::Right,
             ..default()

@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use manifold_csg::{CrossSection, Manifold};
+use manifold_csg::{CrossSection, Manifold, OpType};
+
+use crate::core::geometry;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BrushPrimitive {
@@ -37,25 +39,17 @@ pub enum BrushPrimitive {
     Empty,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
-pub enum BrushMode {
-    #[default]
-    Additive,
-    Subtractive,
-    Intersect,
-}
-
 #[derive(Component, Debug, Clone)]
 pub struct Brush {
     pub manifold: Manifold,
 
-    pub mode: BrushMode,
+    pub mode: OpType,
 
     pub transform: Transform,
 }
 
 impl Brush {
-    pub fn new(primitive: BrushPrimitive, mode: BrushMode, transform: Transform) -> Brush {
+    pub fn new(primitive: BrushPrimitive, mode: OpType, transform: Transform) -> Brush {
         let mut m = match primitive {
             BrushPrimitive::Cube { size } => {
                 Manifold::cube(size.x as f64, size.y as f64, size.z as f64, true)
@@ -95,6 +89,8 @@ impl Brush {
             BrushPrimitive::Empty => Manifold::empty(),
             BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
         };
+        let affine = geometry::bevy_transform_to_affine(transform);
+        m = m.transform(&affine);
         Self {
             manifold: m,
             mode,
