@@ -1,8 +1,12 @@
+use std::time::Instant;
+
+use bevy::audio::CpalSample;
 use bevy::camera_controller::free_camera::{FreeCamera, FreeCameraPlugin};
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, Window};
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
+use manifold_csg::Manifold;
 
 mod core;
 mod gui;
@@ -64,7 +68,6 @@ fn mouse_grid_raycast_system(
 
     if ray.direction.y.abs() > 0.0001 {
         let t = (current_grid_y - ray.origin.y) / ray.direction.y;
-
         if t >= 0.0 {
             let intersection_point = ray.get_point(t);
 
@@ -92,11 +95,11 @@ fn mouse_grid_raycast_system(
                     BrushPrimitive::Cube {
                         size: Vec3::splat(2.0),
                     },
-                    BrushMode::Additive,
+                    BrushMode::Subtractive,
                     spawn_transform,
                 );
 
-                world_state.add_brush(new_cube_brush);
+                world_state.add_brush(&new_cube_brush);
                 world_state.needs_rebuild = true;
             }
         }
@@ -107,7 +110,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Pangu Level Designer - Kernel Verification".into(),
+                title: "Pangu Level Designer".into(),
                 ..default()
             }),
             ..default()
@@ -124,14 +127,22 @@ fn main() {
 fn initialize_testing_world() -> EditorWorld {
     let mut world = EditorWorld::new();
 
-    let base_cube = Brush::new(
-        BrushPrimitive::Cube {
-            size: Vec3::splat(1.0),
-        },
-        BrushMode::Additive,
-        Transform::IDENTITY.with_scale(vec3(6.0, 1.0, 6.0)),
-    );
-    world.add_brush(base_cube);
+    let mut i: u32 = 0;
+    let t0 = Instant::now();
+    while i < 10000 {
+        let bm = BrushMode::Additive;
+        let base_cube = Brush::new(
+            BrushPrimitive::Cube {
+                size: Vec3::splat(1.0),
+            },
+            bm,
+            Transform::IDENTITY.with_scale(vec3(6.0, 1.0, 6.0)),
+        );
+        world.add_brush(&base_cube);
+        i += 1;
+    }
+    let elapsed = t0.elapsed();
+    println!("elapsed: {:.3?}", elapsed);
 
     world
 }

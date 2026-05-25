@@ -49,23 +49,24 @@ impl EditorWorld {
         }
     }
 
-    fn apply_brush(&mut self, brush: Brush) {
-        let mut m = brush.manifold;
-        m = m.translate(
-            brush.transform.translation.x as f64,
-            brush.transform.translation.y as f64,
-            brush.transform.translation.z as f64,
-        );
-        m = m.rotate(
-            brush.transform.rotation.x as f64,
-            brush.transform.rotation.y as f64,
-            brush.transform.rotation.z as f64,
-        );
-        m = m.scale(
-            brush.transform.scale.x as f64,
-            brush.transform.scale.y as f64,
-            brush.transform.scale.z as f64,
-        );
+    fn apply_brush(&mut self, brush: &Brush) {
+        let mut m = brush.clone().manifold;
+        let cols = brush.transform.to_matrix().to_cols_array();
+        let t = [
+            cols[0] as f64,
+            cols[1] as f64,
+            cols[2] as f64,
+            cols[4] as f64, // row 0
+            cols[5] as f64,
+            cols[6] as f64,
+            cols[8] as f64,
+            cols[9] as f64, // row 1
+            cols[10] as f64,
+            cols[12] as f64,
+            cols[13] as f64,
+            cols[14] as f64, // row 2
+        ];
+        m = m.transform(&t);
         if brush.mode == BrushMode::Additive {
             self.base_brush.manifold = self.base_brush.manifold.union(&m);
         } else if brush.mode == BrushMode::Subtractive {
@@ -75,10 +76,9 @@ impl EditorWorld {
         }
     }
 
-    pub fn add_brush(&mut self, brush: Brush) {
+    pub fn add_brush(&mut self, brush: &Brush) {
         self.brushes.push(brush.clone());
         self.apply_brush(brush);
-        self.rebuild();
         self.needs_rebuild = true;
     }
 
@@ -93,7 +93,7 @@ impl EditorWorld {
                     self.selected_brush_index = Some(selected - 1);
                 }
             }
-            self.rebuild();
+            //self.rebuild();
             self.needs_rebuild = true;
         }
     }
@@ -114,7 +114,7 @@ impl EditorWorld {
         );
         let brushes = self.brushes.clone();
         for b in brushes {
-            self.apply_brush(b);
+            self.apply_brush(&b);
         }
     }
 }
