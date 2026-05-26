@@ -3,10 +3,12 @@ use crate::core::{
     geometry,
 };
 use bevy::prelude::*;
-use manifold_csg::Manifold;
+use manifold_csg::{Manifold, OpType};
 
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
+    pub add_brush_mode: OpType,
+
     pub base_manifold: Manifold,
 
     pub brushes: Vec<Brush>,
@@ -25,6 +27,7 @@ pub struct EditorWorld {
 impl Default for EditorWorld {
     fn default() -> Self {
         Self {
+            add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
@@ -40,6 +43,7 @@ impl Default for EditorWorld {
 impl EditorWorld {
     pub fn new() -> Self {
         Self {
+            add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),

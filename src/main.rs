@@ -9,6 +9,7 @@ mod gui;
 use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
 use crate::core::world::EditorWorld;
+use crate::gui::primitive_selector::primitive_selector_system;
 
 #[derive(Component)]
 pub struct EditorGridMarker;
@@ -81,20 +82,18 @@ fn mouse_grid_raycast_system(
                 Color::srgb(1.0, 0.75, 0.0),
             );
 
-            if mouse_input.just_pressed(MouseButton::Left) {
+            if mouse_input.pressed(MouseButton::Left) {
                 let spawn_transform =
                     Transform::from_xyz(center_position.x, current_grid_y, center_position.z);
 
-                let new_cube_brush = Brush::new(
-                    BrushPrimitive::Cube {
-                        size: Vec3::splat(1.0),
-                    },
-                    manifold_csg::OpType::Add,
+                let brush_to_spawn = Brush::new(
+                    world_state.selected_brush_primitive,
+                    world_state.add_brush_mode,
                     spawn_transform,
                 );
 
-                world_state.add_brush(&new_cube_brush);
-                world_state.apply_brush(&new_cube_brush);
+                world_state.add_brush(&brush_to_spawn);
+                world_state.apply_brush(&brush_to_spawn);
             }
         }
     }
@@ -115,6 +114,7 @@ fn main() {
         .insert_resource(initialize_testing_world())
         .add_systems(Startup, setup_editor_workspace)
         .add_systems(Update, mouse_grid_raycast_system)
+        .add_systems(Update, primitive_selector_system)
         .run();
 }
 
