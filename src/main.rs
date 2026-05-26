@@ -82,7 +82,7 @@ fn mouse_grid_raycast_system(
                 Color::srgb(1.0, 0.75, 0.0),
             );
 
-            if mouse_input.pressed(MouseButton::Left) {
+            if mouse_input.just_pressed(MouseButton::Left) {
                 let spawn_transform =
                     Transform::from_xyz(center_position.x, current_grid_y, center_position.z);
 
