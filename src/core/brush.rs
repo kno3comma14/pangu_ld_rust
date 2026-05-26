@@ -41,10 +41,9 @@ pub enum BrushPrimitive {
 
 #[derive(Component, Debug, Clone)]
 pub struct Brush {
+    pub base_primitive: BrushPrimitive,
     pub manifold: Manifold,
-
     pub mode: OpType,
-
     pub transform: Transform,
 }
 
@@ -88,10 +87,12 @@ impl Brush {
             BrushPrimitive::World => Manifold::empty(),
             BrushPrimitive::Empty => Manifold::empty(),
             BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
+            _ => Manifold::empty(),
         };
         let affine = geometry::bevy_transform_to_affine(transform);
         m = m.transform(&affine);
         Self {
+            base_primitive: primitive,
             manifold: m,
             mode,
             transform,

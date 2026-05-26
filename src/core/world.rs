@@ -3,7 +3,7 @@ use crate::core::{
     geometry,
 };
 use bevy::prelude::*;
-use manifold_csg::{Manifold, OpType};
+use manifold_csg::Manifold;
 
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
@@ -82,6 +82,7 @@ impl EditorWorld {
     }
 
     pub fn bake(&mut self) {
+        self.base_manifold = Manifold::empty();
         for br in self.brushes.clone() {
             self.apply_brush(&br);
         }
