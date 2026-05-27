@@ -5,15 +5,26 @@ use crate::core::{
 use bevy::prelude::*;
 use manifold_csg::{Manifold, OpType};
 
+#[derive(Debug, Clone)]
+pub enum EditorToolActive {
+    Add,
+    Select,
+    Transform,
+}
+
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
+    pub active_tool: EditorToolActive,
+
     pub add_brush_mode: OpType,
 
     pub base_manifold: Manifold,
 
     pub brushes: Vec<Brush>,
 
-    pub selected_brush_index: Option<usize>,
+    pub selected_brushes_indexes: Vec<usize>,
+
+    pub highlighted_brush_index: Option<usize>,
 
     pub needs_rebuild: bool,
 
@@ -27,11 +38,13 @@ pub struct EditorWorld {
 impl Default for EditorWorld {
     fn default() -> Self {
         Self {
+            active_tool: EditorToolActive::Add,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
-            selected_brush_index: None,
+            selected_brushes_indexes: Vec::new(),
+            highlighted_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
@@ -43,11 +56,13 @@ impl Default for EditorWorld {
 impl EditorWorld {
     pub fn new() -> Self {
         Self {
+            active_tool: EditorToolActive::Add,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
-            selected_brush_index: None,
+            selected_brushes_indexes: Vec::new(),
+            highlighted_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
@@ -69,19 +84,15 @@ impl EditorWorld {
         if index < self.brushes.len() {
             self.brushes.remove(index);
 
-            if let Some(selected) = self.selected_brush_index {
-                if selected == index {
-                    self.selected_brush_index = None;
-                } else if selected > index {
-                    self.selected_brush_index = Some(selected - 1);
-                }
-            }
+            self.selected_brushes_indexes.retain(|x| *x != index);
+            self.needs_rebuild = true;
         }
     }
 
     pub fn swap_brush_order(&mut self, index_a: usize, index_b: usize) {
         if index_a < self.brushes.len() && index_b < self.brushes.len() {
             self.brushes.swap(index_a, index_b);
+            self.needs_rebuild = true;
         }
     }
 
