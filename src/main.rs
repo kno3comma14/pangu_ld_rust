@@ -5,10 +5,12 @@ use bevy::window::Window;
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
 
 mod core;
+mod file;
 mod gui;
 use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
 use crate::core::world::EditorWorld;
+use crate::gui::gltf_importer::GltfImporterGuiPlugin;
 use crate::gui::primitive_selector::primitive_selector_system;
 
 #[derive(Component)]
@@ -45,6 +47,12 @@ fn mouse_grid_raycast_system(
         world_state.grid_height -= snap;
         height_changed = true;
     }
+
+    // if keyboard_input.just_pressed(KeyCode::KeyG) {
+    //     // world_state.grid_height -= snap;
+    //     // height_changed = true;
+    //     export_world_to_gltf(&world_state);
+    // }
 
     let current_grid_y = world_state.grid_height;
 
@@ -111,6 +119,7 @@ fn main() {
         .add_plugins(FreeCameraPlugin)
         .add_plugins(InfiniteGridPlugin)
         .add_plugins(RenderEnginePlugin)
+        .add_plugins(GltfImporterGuiPlugin)
         .insert_resource(initialize_testing_world())
         .add_systems(Startup, setup_editor_workspace)
         .add_systems(Update, mouse_grid_raycast_system)
