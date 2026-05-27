@@ -5,16 +5,13 @@ use std::io::Write;
 
 use crate::core::world::EditorWorld;
 
-/// Computes the active Manifold CSG world tree and writes a specification-compliant glTF + bin bundle
 pub fn export_world_to_gltf(world: &EditorWorld) {
-    // 1. Accumulate the CSG tree identically to how the renderer generates it
     let mut runtime_manifold = manifold_csg::Manifold::empty();
     let brushes_clone = world.brushes.clone();
     for br in brushes_clone {
         runtime_manifold = runtime_manifold.boolean(&br.manifold, br.mode);
     }
 
-    // 2. Fetch raw geometry data arrays
     let (vert_props, _, tri_indices) = runtime_manifold.to_mesh_f32();
     if vert_props.is_empty() || tri_indices.is_empty() {
         println!("Export cancelled: The baked layout doesn't contain any geometry!");
@@ -31,24 +28,20 @@ pub fn export_world_to_gltf(world: &EditorWorld) {
 
     let indices: Vec<u32> = tri_indices;
 
-    // 3. Assemble binary buffer block arrays
     let mut buffer_bytes = Vec::new();
 
-    // Position bytes setup - FIXED: Forcing Little-Endian (`to_le_bytes`) for specification compliance
     let pos_offset = buffer_bytes.len();
     for pos in &positions {
         buffer_bytes.extend_from_slice(&pos.to_le_bytes());
     }
     let pos_length = buffer_bytes.len() - pos_offset;
 
-    // Indices bytes setup - FIXED: Forcing Little-Endian (`to_le_bytes`) for specification compliance
     let idx_offset = buffer_bytes.len();
     for idx in &indices {
         buffer_bytes.extend_from_slice(&idx.to_le_bytes());
     }
     let idx_length = buffer_bytes.len() - idx_offset;
 
-    // 4. Construct structural glTF JSON node definitions
     let mut json = gltf_json::Root::default();
 
     let buffer_idx = json.push(gltf_json::Buffer {
@@ -164,7 +157,6 @@ pub fn export_world_to_gltf(world: &EditorWorld) {
         nodes: vec![node_idx],
     });
 
-    // 5. Commit data pools locally to storage files
     let json_string = gltf_json::serialize::to_string_pretty(&json).expect("Serialization failure");
 
     let mut gltf_file = File::create("pangu.gltf").expect("Unable to create pangu.gltf");

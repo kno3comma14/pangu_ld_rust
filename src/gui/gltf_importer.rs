@@ -1,8 +1,6 @@
-use bevy::prelude::*;
-// Import your world context resource
 use crate::core::world::EditorWorld;
-// Import the public export function from your separate file
 use crate::file::gltf::export_world_to_gltf;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct ExportButtonMarker;
@@ -16,7 +14,6 @@ impl Plugin for GltfImporterGuiPlugin {
     }
 }
 
-/// Spawns a clean, standalone Bevy UI Button on the screen
 fn spawn_export_button_ui(mut commands: Commands) {
     commands
         .spawn((
@@ -53,13 +50,12 @@ fn spawn_export_button_ui(mut commands: Commands) {
         });
 }
 
-/// Detects mouse interaction layers and triggers your external export file pipeline
 fn handle_export_button_interaction(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<ExportButtonMarker>),
     >,
-    world_state: Res<EditorWorld>, // Fetches your core level state data resource
+    world_state: Res<EditorWorld>,
 ) {
     for (interaction, mut bg_color) in &mut interaction_query {
         match *interaction {
@@ -72,7 +68,6 @@ fn handle_export_button_interaction(
                 }));
                 println!("Triggered Export from GUI Plugin...");
 
-                // CALLING THE SEPARATE FILE LOGIC NATIVELY
                 export_world_to_gltf(&world_state);
             }
             Interaction::Hovered => {

@@ -48,12 +48,6 @@ fn mouse_grid_raycast_system(
         height_changed = true;
     }
 
-    // if keyboard_input.just_pressed(KeyCode::KeyG) {
-    //     // world_state.grid_height -= snap;
-    //     // height_changed = true;
-    //     export_world_to_gltf(&world_state);
-    // }
-
     let current_grid_y = world_state.grid_height;
 
     if height_changed {
