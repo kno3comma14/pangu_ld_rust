@@ -9,7 +9,7 @@ mod file;
 mod gui;
 use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
-use crate::core::world::EditorWorld;
+use crate::core::world::{EditorMode, EditorWorld};
 use crate::gui::gltf_importer::GltfImporterGuiPlugin;
 use crate::gui::primitive_selector::primitive_selector_system;
 
@@ -96,6 +96,18 @@ fn mouse_grid_raycast_system(
 
                 world_state.add_brush(&brush_to_spawn);
                 world_state.apply_brush(&brush_to_spawn);
+            }
+
+            if keyboard_input.just_pressed(KeyCode::Tab) {
+                match world_state.editor_mode {
+                    EditorMode::WorkshopMode => {
+                        world_state.editor_mode = EditorMode::ManifoldMode;
+                    }
+                    EditorMode::ManifoldMode => {
+                        world_state.editor_mode = EditorMode::WorkshopMode;
+                    }
+                }
+                world_state.needs_rebuild = true;
             }
         }
     }

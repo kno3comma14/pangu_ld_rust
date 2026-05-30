@@ -12,9 +12,9 @@ pub enum EditorToolActive {
     Transform,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EditorMode {
-    BakeMode,
+    ManifoldMode,
     WorkshopMode,
 }
 
@@ -76,7 +76,7 @@ impl EditorWorld {
             grid_snap: 1.0,
             grid_height: 0.0,
             selected_brush_primitive: brush::BrushPrimitive::Cube { size: Vec3::ONE },
-            editor_mode: EditorMode::WorkshopMode,
+            editor_mode: EditorMode::ManifoldMode,
         }
     }
 
@@ -107,10 +107,15 @@ impl EditorWorld {
     }
 
     pub fn bake(&mut self) {
-        self.base_manifold = Manifold::empty();
-        for br in self.brushes.clone() {
-            self.apply_brush(&br);
-        }
+        match self.editor_mode {
+            EditorMode::ManifoldMode => {
+                self.base_manifold = Manifold::empty();
+                for br in self.brushes.clone() {
+                    self.apply_brush(&br);
+                }
+            }
+            EditorMode::WorkshopMode => {}
+        };
 
         self.needs_rebuild = true;
     }
