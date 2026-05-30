@@ -277,13 +277,13 @@ fn visual_highlight_system(
     >,
     world_state: Res<EditorWorld>,
 ) {
-    for (material_handle, marker) in &hovered_brush_query {
+    for (material_handle, _marker) in &hovered_brush_query {
         if let Some(material) = materials.get_mut(&material_handle.0) {
             material.base_color.set_alpha(0.8);
         }
     }
 
-    for (material_handle, marker) in &normal_brush_query {
+    for (material_handle, _marker) in &normal_brush_query {
         if let Some(material) = materials.get_mut(&material_handle.0) {
             material.base_color.set_alpha(0.4);
         }
