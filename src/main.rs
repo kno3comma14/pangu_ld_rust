@@ -5,10 +5,12 @@ use bevy::window::Window;
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
 
 mod core;
+mod file;
 mod gui;
 use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
-use crate::core::world::EditorWorld;
+use crate::core::world::{EditorMode, EditorWorld};
+use crate::gui::gltf_importer::GltfImporterGuiPlugin;
 use crate::gui::primitive_selector::primitive_selector_system;
 
 #[derive(Component)]
@@ -95,6 +97,18 @@ fn mouse_grid_raycast_system(
                 world_state.add_brush(&brush_to_spawn);
                 world_state.apply_brush(&brush_to_spawn);
             }
+
+            if keyboard_input.just_pressed(KeyCode::Tab) {
+                match world_state.editor_mode {
+                    EditorMode::WorkshopMode => {
+                        world_state.editor_mode = EditorMode::ManifoldMode;
+                    }
+                    EditorMode::ManifoldMode => {
+                        world_state.editor_mode = EditorMode::WorkshopMode;
+                    }
+                }
+                world_state.needs_rebuild = true;
+            }
         }
     }
 }
@@ -111,6 +125,7 @@ fn main() {
         .add_plugins(FreeCameraPlugin)
         .add_plugins(InfiniteGridPlugin)
         .add_plugins(RenderEnginePlugin)
+        .add_plugins(GltfImporterGuiPlugin)
         .insert_resource(initialize_testing_world())
         .add_systems(Startup, setup_editor_workspace)
         .add_systems(Update, mouse_grid_raycast_system)
