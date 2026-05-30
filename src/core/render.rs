@@ -141,14 +141,28 @@ fn rebuild_dirty_world_system(
                     },
                 };
 
-                commands.spawn((
+                let mesh_bundle = (
                     Mesh3d(meshes.add(new_mesh)),
                     MeshMaterial3d(materials.add(brush_material)),
                     Transform::IDENTITY,
                     Visibility::Visible,
                     InheritedVisibility::default(),
                     WorkshopBrushMarker { brush_id: index },
-                ));
+                );
+
+                commands.spawn(mesh_bundle);
+
+                // if b.mode == OpType::Subtract {
+                //     commands.spawn((
+                //         mesh_bundle,
+                //         bevy::pbr::wireframe::Wireframe,
+                //         bevy::pbr::wireframe::WireframeColor {
+                //             color: Color::srgb(1.0, 0.0, 0.0), // High visibility red outlines
+                //         },
+                //     ));
+                // } else {
+                //     commands.spawn(mesh_bundle);
+                // }
             }
         }
     }
