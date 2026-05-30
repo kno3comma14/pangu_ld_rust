@@ -1,9 +1,14 @@
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
 use bevy::asset::RenderAssetUsages;
+use bevy::camera::primitives::Aabb;
+use bevy::math::bounding::{Aabb3d, RayCast3d};
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use manifold_csg::OpType;
+
+#[derive(Component)]
+pub struct HoveredBrush;
 
 #[derive(Component)]
 pub struct WorkshopBrushMarker {
@@ -19,7 +24,9 @@ impl Plugin for RenderEnginePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default())
             .add_systems(Startup, setup_render_environment)
-            .add_systems(Update, rebuild_dirty_world_system);
+            .add_systems(Update, rebuild_dirty_world_system)
+            .add_systems(Update, brush_hover_picking_system)
+            .add_systems(Update, visual_highlight_system);
     }
 }
 
@@ -54,6 +61,35 @@ fn setup_render_environment(
         InheritedVisibility::default(),
         GlobalManifoldMarker,
     ));
+}
+
+fn update_mesh_geometry(bevy_mesh: &mut Mesh, mesh_gl: &manifold_csg::MeshGL) {
+    let stride = mesh_gl.num_prop() as usize;
+    let positions: Vec<[f32; 3]> = mesh_gl
+        .vert_properties()
+        .chunks_exact(stride)
+        .map(|chunk| [chunk[0], chunk[1], chunk[2]])
+        .collect();
+
+    let indices: Vec<u32> = mesh_gl.tri_verts();
+
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
+
+    bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    bevy_mesh.insert_indices(Indices::U32(indices));
+
+    let _ = bevy_mesh.try_duplicate_vertices();
+    let _ = bevy_mesh.compute_flat_normals();
+}
+
+fn clear_mesh_geometry(bevy_mesh: &mut Mesh) {
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_POSITION);
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
+    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
+    bevy_mesh.remove_indices();
 }
 
 fn rebuild_dirty_world_system(
@@ -170,31 +206,86 @@ fn rebuild_dirty_world_system(
     world_state.needs_rebuild = false;
 }
 
-fn update_mesh_geometry(bevy_mesh: &mut Mesh, mesh_gl: &manifold_csg::MeshGL) {
-    let stride = mesh_gl.num_prop() as usize;
-    let positions: Vec<[f32; 3]> = mesh_gl
-        .vert_properties()
-        .chunks_exact(stride)
-        .map(|chunk| [chunk[0], chunk[1], chunk[2]])
-        .collect();
+fn brush_hover_picking_system(
+    mut commands: Commands,
+    window: Single<&Window>,
+    camera_data: Single<(&Camera, &GlobalTransform)>,
+    brush_query: Query<(Entity, &GlobalTransform, &Aabb), With<WorkshopBrushMarker>>,
+    hovered_query: Query<Entity, With<HoveredBrush>>,
+) {
+    for entity in &hovered_query {
+        commands.entity(entity).remove::<HoveredBrush>();
+    }
 
-    let indices: Vec<u32> = mesh_gl.tri_verts();
+    let Some(cursor_position) = window.cursor_position() else {
+        return;
+    };
 
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
+    let (camera, camera_transform) = *camera_data;
+    let Ok(world_ray) = camera.viewport_to_world(camera_transform, cursor_position) else {
+        return;
+    };
 
-    bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-    bevy_mesh.insert_indices(Indices::U32(indices));
+    let mut closest_hit: Option<(Entity, f32)> = None;
 
-    let _ = bevy_mesh.try_duplicate_vertices();
-    let _ = bevy_mesh.compute_flat_normals();
+    for (entity, global_transform, local_aabb) in &brush_query {
+        let world_to_local = global_transform.affine().inverse();
+
+        let local_origin = world_to_local.transform_point3(world_ray.origin);
+        let local_direction = world_to_local
+            .transform_vector3(world_ray.direction.to_vec3a().to_vec3())
+            .normalize();
+
+        let Ok(local_dir3) = Dir3::new(local_direction) else {
+            continue;
+        };
+
+        let local_ray = Ray3d::new(local_origin, local_dir3);
+        let ray_cast = RayCast3d::from_ray(local_ray, f32::MAX);
+
+        let local_aabb_3d = Aabb3d::new(
+            Vec3::from(local_aabb.center),
+            Vec3::from(local_aabb.half_extents),
+        );
+
+        if let Some(distance) = ray_cast.aabb_intersection_at(&local_aabb_3d) {
+            let hit_point_local = local_origin + local_direction * distance;
+            let hit_point_world = global_transform.affine().transform_point3(hit_point_local);
+            let world_distance = world_ray.origin.distance(hit_point_world);
+
+            if closest_hit.is_none() || world_distance < closest_hit.unwrap().1 {
+                closest_hit = Some((entity, world_distance));
+            }
+        }
+    }
+
+    if let Some((entity, _)) = closest_hit {
+        commands.entity(entity).insert(HoveredBrush);
+    }
 }
 
-fn clear_mesh_geometry(bevy_mesh: &mut Mesh) {
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_POSITION);
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
-    bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
-    bevy_mesh.remove_indices();
+fn visual_highlight_system(
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    // Query brushes that are currently hovered
+    hovered_brush_query: Query<
+        (&MeshMaterial3d<StandardMaterial>, &WorkshopBrushMarker),
+        With<HoveredBrush>,
+    >,
+    normal_brush_query: Query<
+        (&MeshMaterial3d<StandardMaterial>, &WorkshopBrushMarker),
+        Without<HoveredBrush>,
+    >,
+    world_state: Res<EditorWorld>,
+) {
+    for (material_handle, marker) in &hovered_brush_query {
+        if let Some(material) = materials.get_mut(&material_handle.0) {
+            material.base_color.set_alpha(0.8);
+        }
+    }
+
+    for (material_handle, marker) in &normal_brush_query {
+        if let Some(material) = materials.get_mut(&material_handle.0) {
+            material.base_color.set_alpha(0.4);
+        }
+    }
 }
