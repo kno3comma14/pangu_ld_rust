@@ -68,16 +68,20 @@ fn rebuild_dirty_world_system(
 
                 let indices: Vec<u32> = mesh_gl.tri_verts();
 
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
+
                 bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
                 bevy_mesh.insert_indices(Indices::U32(indices));
 
-                if let Err(e) = bevy_mesh.try_duplicate_vertices() {
-                    eprintln!("Failed to duplicate vertices: {:?}", e);
-                    // Handle the failure gracefully (e.g., skip this mesh or log it)
-                }
+                let _ = bevy_mesh.try_duplicate_vertices();
                 let _ = bevy_mesh.compute_flat_normals();
             } else {
                 bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_POSITION);
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
+                bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_TANGENT);
                 bevy_mesh.remove_indices();
             }
         }

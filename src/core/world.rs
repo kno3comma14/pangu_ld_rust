@@ -12,6 +12,12 @@ pub enum EditorToolActive {
     Transform,
 }
 
+#[derive(Debug, Clone)]
+pub enum EditorMode {
+    BakeMode,
+    WorkshopMode,
+}
+
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
     pub active_tool: EditorToolActive,
@@ -33,6 +39,8 @@ pub struct EditorWorld {
     pub grid_height: f32,
 
     pub selected_brush_primitive: brush::BrushPrimitive,
+
+    pub editor_mode: EditorMode,
 }
 
 impl Default for EditorWorld {
@@ -49,6 +57,7 @@ impl Default for EditorWorld {
             grid_snap: 1.0,
             grid_height: 0.0,
             selected_brush_primitive: brush::BrushPrimitive::Cube { size: Vec3::ONE },
+            editor_mode: EditorMode::WorkshopMode,
         }
     }
 }
@@ -67,6 +76,7 @@ impl EditorWorld {
             grid_snap: 1.0,
             grid_height: 0.0,
             selected_brush_primitive: brush::BrushPrimitive::Cube { size: Vec3::ONE },
+            editor_mode: EditorMode::WorkshopMode,
         }
     }
 

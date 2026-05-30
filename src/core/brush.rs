@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use manifold_csg::{CrossSection, Manifold, OpType};
+use manifold_csg::{CrossSection, Manifold, MeshGL, OpType};
 
 use crate::core::geometry;
 
@@ -39,12 +39,28 @@ pub enum BrushPrimitive {
     Empty,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Clone)]
 pub struct Brush {
     pub base_primitive: BrushPrimitive,
     pub manifold: Manifold,
+    pub cached_meshgl: MeshGL,
     pub mode: OpType,
     pub transform: Transform,
+}
+
+impl std::fmt::Debug for Brush {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Brush")
+            .field("base_primitive", &self.base_primitive)
+            // Manifold also doesn't implement Debug, so print a placeholder
+            .field("manifold", &"<Manifold Opaque Handle>")
+            // Print structural stats for MeshGL instead of raw data
+            .field(
+                "cached_meshgl",
+                &format!("MeshGL (num_triangles: {})", self.cached_meshgl.num_tri()),
+            )
+            .finish()
+    }
 }
 
 impl Brush {
@@ -91,11 +107,13 @@ impl Brush {
         };
         let affine = geometry::bevy_transform_to_affine(transform);
         m = m.transform(&affine);
+        let (vert_props, n_props, tri_indices) = m.to_mesh_f32();
         Self {
             base_primitive: primitive,
             manifold: m,
-            mode,
-            transform,
+            cached_meshgl: MeshGL::new(&vert_props, n_props, &tri_indices),
+            mode: mode,
+            transform: transform,
         }
     }
 }

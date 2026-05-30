@@ -15,7 +15,7 @@ pub fn primitive_selector_system(
     } else if keyboard.just_pressed(KeyCode::Digit5) {
         world_state.selected_brush_primitive = BrushPrimitive::Sphere {
             radius: 0.5,
-            subdivisions: 4,
+            subdivisions: 64,
         };
         println!("Selected Tool: Sphere");
     } else if keyboard.just_pressed(KeyCode::Digit6) {
