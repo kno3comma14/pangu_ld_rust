@@ -1,6 +1,6 @@
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
-use crate::tool::{selection_tool, selection_tool::SelectedBrush};
+use crate::tool::{selection_tool::SelectToolPlugin, selection_tool::SelectedBrush};
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::primitives::Aabb;
 use bevy::math::bounding::{Aabb3d, RayCast3d};
@@ -24,14 +24,11 @@ pub struct RenderEnginePlugin;
 impl Plugin for RenderEnginePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default())
+            .add_plugins(SelectToolPlugin)
             .add_systems(Startup, setup_render_environment)
             .add_systems(Update, rebuild_dirty_world_system)
             .add_systems(Update, brush_hover_picking_system)
-            .add_systems(Update, selection_tool::brush_selection_system)
-            .add_systems(
-                Update,
-                visual_highlight_system.after(selection_tool::brush_selection_system),
-            );
+            .add_systems(Update, visual_highlight_system);
     }
 }
 
@@ -276,18 +273,6 @@ fn visual_highlight_system(
     >,
     world_state: Res<EditorWorld>,
 ) {
-    // for (material_handle, _marker) in &hovered_brush_query {
-    //     if let Some(material) = materials.get_mut(&material_handle.0) {
-    //         material.base_color.set_alpha(0.8);
-    //     }
-    // }
-
-    // for (material_handle, _marker) in &normal_brush_query {
-    //     if let Some(material) = materials.get_mut(&material_handle.0) {
-    //         material.base_color.set_alpha(0.4);
-    //     }
-    // }
-    //
     for material_handle in &selected_brush_query {
         if let Some(material) = materials.get_mut(&material_handle.0) {
             material.base_color.set_alpha(0.9);
