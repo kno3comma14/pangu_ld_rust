@@ -11,7 +11,7 @@ mod tool;
 use crate::core::brush::{Brush, BrushPrimitive};
 use crate::core::render::RenderEnginePlugin;
 use crate::core::world::{EditorMode, EditorWorld};
-use crate::gui::gltf_importer::GltfImporterGuiPlugin;
+use crate::gui::gltf_exporter::GltfExporterGuiPlugin;
 use crate::gui::primitive_selector::primitive_selector_system;
 
 #[derive(Component)]
@@ -21,7 +21,6 @@ fn mouse_grid_raycast_system(
     window_query: Query<&Window, With<bevy::window::PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mouse_input: Res<ButtonInput<MouseButton>>,
     mut world_state: ResMut<EditorWorld>,
     mut grid_query: Query<&mut Transform, With<EditorGridMarker>>, // Clean, direct query parameter
     mut gizmos: Gizmos,
@@ -126,7 +125,7 @@ fn main() {
         .add_plugins(FreeCameraPlugin)
         .add_plugins(InfiniteGridPlugin)
         .add_plugins(RenderEnginePlugin)
-        .add_plugins(GltfImporterGuiPlugin)
+        .add_plugins(GltfExporterGuiPlugin)
         .insert_resource(initialize_testing_world())
         .add_systems(Startup, setup_editor_workspace)
         .add_systems(Update, mouse_grid_raycast_system)
