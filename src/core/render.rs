@@ -1,5 +1,6 @@
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
+use crate::tool::{selection_tool::SelectToolPlugin, selection_tool::SelectedBrush};
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::primitives::Aabb;
 use bevy::math::bounding::{Aabb3d, RayCast3d};
@@ -23,6 +24,7 @@ pub struct RenderEnginePlugin;
 impl Plugin for RenderEnginePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default())
+            .add_plugins(SelectToolPlugin)
             .add_systems(Startup, setup_render_environment)
             .add_systems(Update, rebuild_dirty_world_system)
             .add_systems(Update, brush_hover_picking_system)
@@ -186,19 +188,13 @@ fn rebuild_dirty_world_system(
                     WorkshopBrushMarker { brush_id: index },
                 );
 
-                commands.spawn(mesh_bundle);
-
-                // if b.mode == OpType::Subtract {
-                //     commands.spawn((
-                //         mesh_bundle,
-                //         bevy::pbr::wireframe::Wireframe,
-                //         bevy::pbr::wireframe::WireframeColor {
-                //             color: Color::srgb(1.0, 0.0, 0.0), // High visibility red outlines
-                //         },
-                //     ));
-                // } else {
-                //     commands.spawn(mesh_bundle);
-                // }
+                commands.spawn((
+                    mesh_bundle,
+                    // bevy::pbr::wireframe::Wireframe, // Used for wireframe feature, I don't like it but it can be used from configuration in the future
+                    // bevy::pbr::wireframe::WireframeColor {
+                    //     color: Color::srgb(1.0, 1.0, 1.0),
+                    // },
+                ));
             }
         }
     }
@@ -266,26 +262,36 @@ fn brush_hover_picking_system(
 
 fn visual_highlight_system(
     mut materials: ResMut<Assets<StandardMaterial>>,
-    // Query brushes that are currently hovered
-    hovered_brush_query: Query<
+    selected_brush_query: Query<&MeshMaterial3d<StandardMaterial>, With<SelectedBrush>>,
+    hovered_only_brush_query: Query<
         (&MeshMaterial3d<StandardMaterial>, &WorkshopBrushMarker),
-        With<HoveredBrush>,
+        (With<HoveredBrush>, Without<SelectedBrush>),
     >,
-    normal_brush_query: Query<
+    neutral_brush_query: Query<
         (&MeshMaterial3d<StandardMaterial>, &WorkshopBrushMarker),
-        Without<HoveredBrush>,
+        (Without<HoveredBrush>, Without<SelectedBrush>),
     >,
     world_state: Res<EditorWorld>,
 ) {
-    for (material_handle, _marker) in &hovered_brush_query {
+    for material_handle in &selected_brush_query {
         if let Some(material) = materials.get_mut(&material_handle.0) {
-            material.base_color.set_alpha(0.8);
+            material.base_color.set_alpha(0.9);
+            // Give it a subtle white glow effect in the editor viewport
+            material.emissive = LinearRgba::WHITE.into();
         }
     }
 
-    for (material_handle, _marker) in &normal_brush_query {
-        if let Some(material) = materials.get_mut(&material_handle.0) {
+    for material_handle in &hovered_only_brush_query {
+        if let Some(material) = materials.get_mut(material_handle.0) {
+            material.base_color.set_alpha(0.6);
+            material.emissive = LinearRgba::BLACK.into(); // No glow
+        }
+    }
+
+    for material_handle in &neutral_brush_query {
+        if let Some(material) = materials.get_mut(material_handle.0) {
             material.base_color.set_alpha(0.4);
+            material.emissive = LinearRgba::BLACK.into();
         }
     }
 }

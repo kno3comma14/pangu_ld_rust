@@ -1,2 +1,2 @@
-pub mod gltf_importer;
+pub mod gltf_exporter;
 pub mod primitive_selector;

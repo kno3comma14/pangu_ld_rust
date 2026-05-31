@@ -5,9 +5,9 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct ExportButtonMarker;
 
-pub struct GltfImporterGuiPlugin;
+pub struct GltfExporterGuiPlugin;
 
-impl Plugin for GltfImporterGuiPlugin {
+impl Plugin for GltfExporterGuiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_export_button_ui)
             .add_systems(Update, handle_export_button_interaction);
