@@ -116,4 +116,12 @@ impl Brush {
             transform: transform,
         }
     }
+
+    pub fn transformBrush(&mut self, t: Transform) {
+        let affine = geometry::bevy_transform_to_affine(t);
+        self.transform = t;
+        self.manifold = self.manifold.transform(&affine);
+        let (vert_props, n_props, tri_indices) = self.manifold.to_mesh_f32();
+        self.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
+    }
 }
