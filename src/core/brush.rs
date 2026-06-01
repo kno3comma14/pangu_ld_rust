@@ -124,4 +124,8 @@ impl Brush {
         let (vert_props, n_props, tri_indices) = self.manifold.to_mesh_f32();
         self.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
     }
+
+    pub fn generate_preview_transform(&mut self, t: Transform) {
+        let mut future_mesh = self.clone();
+    }
 }

@@ -76,7 +76,7 @@ fn mouse_grid_raycast_system(
             let render_height = current_grid_y + 0.01;
             let half_snap = snap * 0.5;
             let center_position = Vec3::new(cell_x + half_snap, render_height, cell_z + half_snap);
-
+            world_state.central_mouse_coords = center_position;
             gizmos.rect(
                 Isometry3d::new(
                     center_position,

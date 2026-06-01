@@ -1,6 +1,9 @@
+use std::marker;
+
 use bevy::prelude::*;
 
 use crate::core::render::HoveredBrush;
+use crate::core::world::EditorWorld;
 
 #[derive(Component)]
 pub struct SelectedBrush;
@@ -15,6 +18,7 @@ impl Plugin for SelectToolPlugin {
 
 fn brush_selection_system(
     mut commands: Commands,
+    mut world_state: ResMut<EditorWorld>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     key_input: Res<ButtonInput<KeyCode>>,
     selected_query: Query<Entity, With<SelectedBrush>>,
@@ -26,22 +30,39 @@ fn brush_selection_system(
         if mouse_lclick_pressed && keyboard_lshift_pressed {
             if !selected_query.contains(hovered_entity) {
                 commands.entity(hovered_entity).insert(SelectedBrush);
+                world_state
+                    .selected_brushes_indexes
+                    .push(hovered_entity.index_u32() as usize);
                 commands.entity(hovered_entity).remove::<HoveredBrush>();
             } else {
                 commands.entity(hovered_entity).remove::<SelectedBrush>();
+                if let Some(idx) = world_state
+                    .selected_brushes_indexes
+                    .iter()
+                    .position(|&x| x == hovered_entity.index_u32() as usize)
+                {
+                    _ = world_state.selected_brushes_indexes.remove(idx);
+                }
             }
         } else if mouse_lclick_pressed {
             for entity in &selected_query {
                 commands.entity(entity).remove::<SelectedBrush>();
             }
+            world_state.selected_brushes_indexes.clear();
+
             commands.entity(hovered_entity).insert(SelectedBrush);
+            world_state
+                .selected_brushes_indexes
+                .push(hovered_entity.index_u32() as usize);
             commands.entity(hovered_entity).remove::<HoveredBrush>();
         }
+        println!("{:?}", world_state.selected_brushes_indexes);
     } else {
         if mouse_lclick_pressed {
             for entity in &selected_query {
                 commands.entity(entity).remove::<SelectedBrush>();
             }
+            world_state.selected_brushes_indexes.clear();
         }
     }
 }
