@@ -5,16 +5,15 @@ use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
 
-enum GridMovement {
-    Up,
-    Down,
-}
+#[derive(Resource)]
+pub struct SnapIndex(pub usize);
 
 pub struct GridPlugin;
 
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, mouse_grid_raycast_system)
+        app.insert_resource(SnapIndex(4))
+            .add_systems(Update, mouse_grid_raycast_system)
             .add_systems(Update, change_grid_snap)
             .add_systems(Update, toggle_snap_usage);
     }
@@ -107,12 +106,20 @@ fn mouse_grid_raycast_system(
 fn change_grid_snap(
     mut world_state: ResMut<EditorWorld>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut snap_index: ResMut<SnapIndex>,
 ) {
+    let snap_values = vec![0.125, 0.25, 0.5, 0.75, 1.0];
+    let max_idx = snap_values.len() - 1;
+
     if keyboard_input.just_pressed(KeyCode::BracketRight) {
-        world_state.grid_snap += 0.5;
+        let current = snap_index.0 as isize + 1;
+        snap_index.0 = current.clamp(0, max_idx as isize) as usize;
     } else if keyboard_input.just_pressed(KeyCode::BracketLeft) {
-        world_state.grid_snap -= 0.5;
+        let current = snap_index.0 as isize - 1;
+        snap_index.0 = current.clamp(0, max_idx as isize) as usize;
     }
+
+    world_state.grid_snap = snap_values[snap_index.0];
 }
 
 fn toggle_snap_usage() {}
