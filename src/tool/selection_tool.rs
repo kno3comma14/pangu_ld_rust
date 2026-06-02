@@ -3,7 +3,7 @@ use std::marker;
 use bevy::prelude::*;
 
 use crate::core::render::HoveredBrush;
-use crate::core::world::EditorWorld;
+use crate::core::world::{EditorToolActive, EditorWorld};
 
 #[derive(Component)]
 pub struct SelectedBrush;
@@ -26,6 +26,7 @@ fn brush_selection_system(
 ) {
     let mouse_lclick_pressed = mouse_input.just_pressed(MouseButton::Left);
     let keyboard_lshift_pressed = key_input.pressed(KeyCode::ShiftLeft);
+
     if let Some(hovered_entity) = hovered_query.iter().next() {
         if mouse_lclick_pressed && keyboard_lshift_pressed {
             if !selected_query.contains(hovered_entity) {

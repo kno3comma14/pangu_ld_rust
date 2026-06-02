@@ -1,6 +1,6 @@
 use crate::EditorGridMarker;
 use crate::core::brush::Brush;
-use crate::core::world::EditorWorld;
+use crate::core::world::{EditorToolActive, EditorWorld};
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
@@ -86,7 +86,9 @@ fn mouse_grid_raycast_system(
                 Color::srgb(1.0, 0.75, 0.0),
             );
 
-            if keyboard_input.just_pressed(KeyCode::Space) {
+            if keyboard_input.just_pressed(KeyCode::Space)
+                && world_state.active_tool == EditorToolActive::Add
+            {
                 let spawn_transform =
                     Transform::from_xyz(center_position.x, current_grid_y, center_position.z);
 

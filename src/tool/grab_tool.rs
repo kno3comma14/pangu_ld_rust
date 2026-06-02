@@ -1,4 +1,3 @@
-use crate::core::world;
 // https://www.youtube.com/watch?v=mvCD7iaunVY
 // https://www.youtube.com/watch?v=PtAxuOAQNcI
 //
@@ -7,7 +6,6 @@ use crate::core::world::EditorWorld;
 use crate::tool::selection_tool::SelectedBrush;
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
-use bevy::input::mouse;
 use bevy::prelude::*;
 
 #[derive(Resource)]

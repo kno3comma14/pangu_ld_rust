@@ -5,7 +5,7 @@ use crate::core::{
 use bevy::prelude::*;
 use manifold_csg::{Manifold, OpType};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EditorToolActive {
     Add,
     SingleSelection,
