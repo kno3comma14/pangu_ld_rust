@@ -8,8 +8,7 @@ use manifold_csg::{Manifold, OpType};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EditorToolActive {
     Add,
-    SingleSelection,
-    MultipleSelection,
+    Selection,
     Grabbing,
     Rotation,
     Scaling,

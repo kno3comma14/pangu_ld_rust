@@ -24,6 +24,7 @@ fn brush_selection_system(
     selected_query: Query<Entity, With<SelectedBrush>>,
     hovered_query: Query<Entity, With<HoveredBrush>>,
 ) {
+    // let in_select_mode = world_state.active_tool == EditorToolActive::Selection; For future validation
     let mouse_lclick_pressed = mouse_input.just_pressed(MouseButton::Left);
     let keyboard_lshift_pressed = key_input.pressed(KeyCode::ShiftLeft);
 

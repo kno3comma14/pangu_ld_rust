@@ -115,7 +115,7 @@ fn rebuild_dirty_world_system(
             for (entity, _, _) in &workshop_mesh_query {
                 commands.entity(entity).despawn();
             }
-
+            world_state.bake();
             if let Ok((_entity, mesh3d, mut visibility)) = global_mesh_query.single_mut() {
                 if let Some(bevy_mesh) = meshes.get_mut(&mesh3d.0) {
                     if let Some(mesh_gl) = CsgCompiler::compile_world(&world_state) {

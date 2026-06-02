@@ -33,13 +33,13 @@ fn main() {
         .add_plugins(GltfExporterGuiPlugin)
         .add_plugins(EditorModeSwitcherPlugin)
         .add_plugins(GridPlugin)
-        .insert_resource(initialize_testing_world())
+        .insert_resource(initialize_world())
         .add_systems(Startup, setup_editor_workspace)
         .add_systems(Update, primitive_selector_system)
         .run();
 }
 
-fn initialize_testing_world() -> EditorWorld {
+fn initialize_world() -> EditorWorld {
     let mut world = EditorWorld::new();
     let bm = manifold_csg::OpType::Add;
     let base_cube = Brush::new(
