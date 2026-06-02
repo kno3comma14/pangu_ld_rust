@@ -2,7 +2,6 @@ use std::marker;
 
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
-use crate::gui::grid::GridPlugin;
 use crate::tool::grab_tool::GrabToolPlugin;
 use crate::tool::{selection_tool::SelectToolPlugin, selection_tool::SelectedBrush};
 use bevy::asset::RenderAssetUsages;
@@ -104,7 +103,7 @@ fn rebuild_dirty_world_system(
     mut world_state: ResMut<EditorWorld>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut global_mesh_query: Query<(&Mesh3d, &mut Visibility), With<GlobalManifoldMarker>>,
+    mut global_mesh_query: Query<(Entity, &Mesh3d, &mut Visibility), With<GlobalManifoldMarker>>,
     workshop_mesh_query: Query<(Entity, &Mesh3d, &WorkshopBrushMarker)>,
 ) {
     if !world_state.needs_rebuild {
@@ -117,8 +116,7 @@ fn rebuild_dirty_world_system(
                 commands.entity(entity).despawn();
             }
 
-            if let Ok((mesh3d, mut visibility)) = global_mesh_query.single_mut() {
-                // Access the internal handle from Mesh3d using .0
+            if let Ok((_entity, mesh3d, mut visibility)) = global_mesh_query.single_mut() {
                 if let Some(bevy_mesh) = meshes.get_mut(&mesh3d.0) {
                     if let Some(mesh_gl) = CsgCompiler::compile_world(&world_state) {
                         update_mesh_geometry(bevy_mesh, &mesh_gl);
@@ -131,14 +129,15 @@ fn rebuild_dirty_world_system(
         }
 
         EditorMode::WorkshopMode => {
-            if let Ok((_, mut visibility)) = global_mesh_query.single_mut() {
+            if let Ok((_entity, _, mut visibility)) = global_mesh_query.single_mut() {
                 *visibility = Visibility::Hidden;
             }
 
             let mut updated_brush_ids = std::collections::HashSet::new();
 
             for (entity, mesh_handle, marker) in &workshop_mesh_query {
-                if let Some(b) = world_state.brushes.get(marker.brush_id) {
+                if let Some(b) = world_state.brushes.get_mut(marker.brush_id) {
+                    b.brush_entity_id = entity.index_u32() as usize;
                     if let Some(bevy_mesh) = meshes.get_mut(&mesh_handle.0) {
                         update_mesh_geometry(bevy_mesh, &b.cached_meshgl);
                     }

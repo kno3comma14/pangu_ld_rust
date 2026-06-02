@@ -52,7 +52,7 @@ fn initialize_testing_world() -> EditorWorld {
         }),
     );
     world.add_brush(&base_cube);
-    world.bake();
+    world.apply_brush(&base_cube);
     world
 }
 

@@ -56,7 +56,6 @@ fn brush_selection_system(
                 .push(hovered_entity.index_u32() as usize);
             commands.entity(hovered_entity).remove::<HoveredBrush>();
         }
-        println!("{:?}", world_state.selected_brushes_indexes);
     } else {
         if mouse_lclick_pressed {
             for entity in &selected_query {
