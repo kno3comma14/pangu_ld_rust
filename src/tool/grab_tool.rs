@@ -61,7 +61,6 @@ fn grab_brush_system(
                 brush.transform = Transform::from_translation(total_mouse_delta);
                 let current_transform = brush.transform;
                 brush.transform_brush(current_transform);
-                world_state.needs_rebuild = true;
             }
         }
         g_position.0 = world_state.central_mouse_coords;
