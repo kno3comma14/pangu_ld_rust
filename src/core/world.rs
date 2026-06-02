@@ -5,12 +5,13 @@ use crate::core::{
 use bevy::prelude::*;
 use manifold_csg::{Manifold, OpType};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EditorToolActive {
     Add,
-    SingleSelection,
-    MultipleSelection,
-    Transform,
+    Selection,
+    Grabbing,
+    Rotation,
+    Scaling,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -22,25 +23,15 @@ pub enum EditorMode {
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
     pub active_tool: EditorToolActive,
-
     pub add_brush_mode: OpType,
-
     pub base_manifold: Manifold,
-
     pub brushes: Vec<Brush>,
-
     pub selected_brushes_indexes: Vec<usize>,
-
-    pub highlighted_brush_index: Option<usize>,
-
     pub needs_rebuild: bool,
-
     pub grid_snap: f32,
-
     pub grid_height: f32,
-
+    pub central_mouse_coords: Vec3,
     pub selected_brush_primitive: brush::BrushPrimitive,
-
     pub editor_mode: EditorMode,
 }
 
@@ -53,10 +44,10 @@ impl Default for EditorWorld {
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
-            highlighted_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
+            central_mouse_coords: Vec3::ZERO,
             selected_brush_primitive: brush::BrushPrimitive::Cube { size: Vec3::ONE },
             editor_mode: EditorMode::WorkshopMode,
         }
@@ -72,10 +63,10 @@ impl EditorWorld {
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
-            highlighted_brush_index: None,
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
+            central_mouse_coords: Vec3::ZERO,
             selected_brush_primitive: brush::BrushPrimitive::Cube { size: Vec3::ONE },
             editor_mode: EditorMode::ManifoldMode,
         }

@@ -46,6 +46,7 @@ pub struct Brush {
     pub cached_meshgl: MeshGL,
     pub mode: OpType,
     pub transform: Transform,
+    pub brush_entity_id: usize,
 }
 
 impl std::fmt::Debug for Brush {
@@ -114,14 +115,19 @@ impl Brush {
             cached_meshgl: MeshGL::new(&vert_props, n_props, &tri_indices),
             mode: mode,
             transform: transform,
+            brush_entity_id: 0,
         }
     }
 
-    pub fn transformBrush(&mut self, t: Transform) {
+    pub fn transform_brush(&mut self, t: Transform) {
         let affine = geometry::bevy_transform_to_affine(t);
         self.transform = t;
         self.manifold = self.manifold.transform(&affine);
         let (vert_props, n_props, tri_indices) = self.manifold.to_mesh_f32();
         self.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
+    }
+
+    pub fn generate_preview_transform(&mut self, t: Transform) {
+        let mut future_mesh = self.clone();
     }
 }
