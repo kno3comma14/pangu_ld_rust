@@ -65,8 +65,7 @@ fn scale_brush_system(
                 .position(|b| b.brush_entity_id == entity_id)
             {
                 let brush = &mut world_state.brushes[idx];
-                brush.transform = Transform::from_scale(pre_scale);
-                let current_transform = brush.transform;
+                let current_transform = Transform::from_scale(pre_scale);
                 brush.transform_brush(current_transform);
             }
         }
