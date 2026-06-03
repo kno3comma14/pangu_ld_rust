@@ -119,10 +119,34 @@ impl Brush {
         }
     }
 
+    pub fn calculate_center(&self) -> Vec3 {
+        let (vert_props, _, _) = self.manifold.to_mesh_f32();
+        if vert_props.is_empty() {
+            return Vec3::ZERO;
+        }
+
+        let mut min = Vec3::splat(f32::MAX);
+        let mut max = Vec3::splat(f32::MIN);
+        for chunk in vert_props.chunks_exact(3) {
+            let pos = Vec3::new(chunk[0], chunk[1], chunk[2]);
+            min = min.min(pos);
+            max = max.max(pos);
+        }
+        (min + max) * 0.5
+    }
+
     pub fn transform_brush(&mut self, t: Transform) {
         let affine = geometry::bevy_transform_to_affine(t);
         self.transform = t;
         self.manifold = self.manifold.transform(&affine);
+        let (vert_props, n_props, tri_indices) = self.manifold.to_mesh_f32();
+        self.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
+    }
+
+    pub fn transform_brush_relative(&mut self, relative_t: Transform, rotation_delta: Quat) {
+        let affine = geometry::bevy_transform_to_affine(relative_t);
+        self.manifold = self.manifold.transform(&affine);
+        self.transform.rotation = rotation_delta * self.transform.rotation;
         let (vert_props, n_props, tri_indices) = self.manifold.to_mesh_f32();
         self.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
     }

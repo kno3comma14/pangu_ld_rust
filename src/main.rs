@@ -64,6 +64,10 @@ fn setup_editor_workspace(mut commands: Commands) {
         Transform::from_xyz(12.0, 15.0, 18.0).looking_at(Vec3::ZERO, Vec3::Y),
         FreeCamera {
             mouse_key_cursor_grab: MouseButton::Right,
+            walk_speed: 25.0,
+            run_speed: 50.0,
+            sensitivity: 2.0,
+            scroll_factor: 0.0,
             ..default()
         },
     ));

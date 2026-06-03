@@ -38,6 +38,7 @@ fn scale_brush_system(
     let Some(cursor_position) = window.cursor_position() else {
         return;
     };
+
     if keyboard_input.just_pressed(KeyCode::KeyT) {
         if selected_query.is_empty() {
             return;
@@ -56,7 +57,9 @@ fn scale_brush_system(
 
     if world_state.active_tool == EditorToolActive::Scaling && !confirmed.0 {
         let total_mouse_delta = cursor_position - pivote_position.0;
-        let pre_scale = reference_scale.0 - Vec3::splat(total_mouse_delta.y * 0.08);
+        let scale_factor = (1.0 - total_mouse_delta.y * 0.01).max(0.001);
+        let delta_scale = Vec3::splat(scale_factor);
+
         for entity in &selected_query {
             let entity_id = entity.index_u32() as usize;
             if let Some(idx) = world_state
@@ -65,11 +68,14 @@ fn scale_brush_system(
                 .position(|b| b.brush_entity_id == entity_id)
             {
                 let brush = &mut world_state.brushes[idx];
-                let current_transform = Transform::from_scale(pre_scale);
+                let pivot = brush.calculate_center();
+                let current_transform = Transform::from_translation(pivot)
+                    * Transform::from_scale(delta_scale)
+                    * Transform::from_translation(-pivot);
                 brush.transform_brush(current_transform);
             }
         }
         pivote_position.0 = cursor_position;
-        world_state.needs_rebuild = true
+        world_state.needs_rebuild = true;
     }
 }
