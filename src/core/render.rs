@@ -1,5 +1,3 @@
-use std::marker;
-
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
 use crate::tool::grab_tool::GrabToolPlugin;

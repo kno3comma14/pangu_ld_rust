@@ -1,9 +1,7 @@
-use std::marker;
-
 use bevy::prelude::*;
 
 use crate::core::render::HoveredBrush;
-use crate::core::world::{EditorToolActive, EditorWorld};
+use crate::core::world::EditorWorld;
 
 #[derive(Component)]
 pub struct SelectedBrush;
