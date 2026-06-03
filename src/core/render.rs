@@ -3,6 +3,7 @@ use std::marker;
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
 use crate::tool::grab_tool::GrabToolPlugin;
+use crate::tool::scale_tool::ScaleToolPlugin;
 use crate::tool::{selection_tool::SelectToolPlugin, selection_tool::SelectedBrush};
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::primitives::Aabb;
@@ -29,6 +30,7 @@ impl Plugin for RenderEnginePlugin {
         app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default())
             .add_plugins(SelectToolPlugin)
             .add_plugins(GrabToolPlugin)
+            .add_plugins(ScaleToolPlugin)
             .add_systems(Startup, setup_render_environment)
             .add_systems(Update, rebuild_dirty_world_system)
             .add_systems(Update, brush_hover_picking_system)
