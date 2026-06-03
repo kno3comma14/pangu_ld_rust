@@ -1,6 +1,7 @@
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
 use crate::tool::grab_tool::GrabToolPlugin;
+use crate::tool::rotation_tool::RotationToolPlugin;
 use crate::tool::scale_tool::ScaleToolPlugin;
 use crate::tool::{selection_tool::SelectToolPlugin, selection_tool::SelectedBrush};
 use bevy::asset::RenderAssetUsages;
@@ -29,6 +30,7 @@ impl Plugin for RenderEnginePlugin {
             .add_plugins(SelectToolPlugin)
             .add_plugins(GrabToolPlugin)
             .add_plugins(ScaleToolPlugin)
+            .add_plugins(RotationToolPlugin)
             .add_systems(Startup, setup_render_environment)
             .add_systems(Update, rebuild_dirty_world_system)
             .add_systems(Update, brush_hover_picking_system)
