@@ -45,6 +45,7 @@ fn grab_brush_system(
 
     if space_pressed && grab_mode_activated.0 {
         confirmed.0 = true;
+        world_state.support_brushes.clear();
         world_state.active_tool = EditorToolActive::Selection;
     }
 

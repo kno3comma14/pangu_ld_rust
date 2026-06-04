@@ -1,4 +1,4 @@
-use crate::core::world::EditorWorld;
+use crate::core::world::{EditorToolActive, EditorWorld};
 use crate::tool::selection_tool::SelectedBrush;
 use bevy::app::Plugin;
 use bevy::input::ButtonInput;
@@ -18,5 +18,18 @@ fn cancel_active_tool(
     mut world_state: ResMut<EditorWorld>,
     selected_query: Query<Entity, With<SelectedBrush>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Escape) {}
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        let is_grs = [
+            EditorToolActive::Grabbing,
+            EditorToolActive::Rotation,
+            EditorToolActive::Scaling,
+        ]
+        .iter()
+        .any(|t| *t == world_state.active_tool);
+        if is_grs && !world_state.grs_tool_confirmed {
+            for sb in &world_state.support_brushes {
+                //look for brushes in selected brushes and substitute by sb manifolds - WIP
+            }
+        }
+    }
 }

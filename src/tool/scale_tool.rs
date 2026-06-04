@@ -53,6 +53,8 @@ fn scale_brush_system(
 
     if space_pressed && world_state.active_tool == EditorToolActive::Scaling {
         confirmed.0 = true;
+        world_state.support_brushes.clear();
+        world_state.active_tool = EditorToolActive::Selection;
     }
 
     if world_state.active_tool == EditorToolActive::Scaling && !confirmed.0 {

@@ -25,6 +25,7 @@ pub enum EditorMode {
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
     pub active_tool: EditorToolActive,
+    pub grs_tool_confirmed: bool,
     pub add_brush_mode: OpType,
     pub base_manifold: Manifold,
     pub brushes: Vec<Brush>,
@@ -42,6 +43,7 @@ impl Default for EditorWorld {
     fn default() -> Self {
         Self {
             active_tool: EditorToolActive::Add,
+            grs_tool_confirmed: false,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
@@ -62,6 +64,7 @@ impl EditorWorld {
     pub fn new() -> Self {
         Self {
             active_tool: EditorToolActive::Add,
+            grs_tool_confirmed: false,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
