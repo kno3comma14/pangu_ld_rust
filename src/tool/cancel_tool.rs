@@ -4,6 +4,7 @@ use bevy::app::Plugin;
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
+use manifold_csg::MeshGL;
 
 pub struct CancelToolPlugin;
 
@@ -16,7 +17,6 @@ impl Plugin for CancelToolPlugin {
 fn cancel_active_tool(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut world_state: ResMut<EditorWorld>,
-    selected_query: Query<Entity, With<SelectedBrush>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         let is_grs = [
@@ -27,9 +27,26 @@ fn cancel_active_tool(
         .iter()
         .any(|t| *t == world_state.active_tool);
         if is_grs && !world_state.grs_tool_confirmed {
-            for sb in &world_state.support_brushes {
-                //look for brushes in selected brushes and substitute by sb manifolds - WIP
+            let EditorWorld {
+                brushes,
+                support_brushes,
+                grs_tool_confirmed,
+                active_tool,
+                needs_rebuild,
+                ..
+            } = &mut *world_state;
+            for (brush_id, backup_manifold) in support_brushes.iter() {
+                if let Some(br) = brushes.iter_mut().find(|b| &b.brush_entity_id == brush_id) {
+                    br.manifold = backup_manifold.clone();
+
+                    let (vert_props, n_props, tri_indices) = br.manifold.to_mesh_f32();
+                    br.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
+                }
             }
+            support_brushes.clear();
+            *grs_tool_confirmed = false;
+            *needs_rebuild = true;
+            *active_tool = EditorToolActive::Selection;
         }
     }
 }
