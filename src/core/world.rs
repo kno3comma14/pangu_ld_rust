@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::core::{
     brush::{self, Brush},
     geometry,
@@ -27,6 +29,7 @@ pub struct EditorWorld {
     pub base_manifold: Manifold,
     pub brushes: Vec<Brush>,
     pub selected_brushes_indexes: Vec<usize>,
+    pub support_brushes: HashMap<usize, Vec3>,
     pub needs_rebuild: bool,
     pub grid_snap: f32,
     pub grid_height: f32,
@@ -44,6 +47,7 @@ impl Default for EditorWorld {
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
+            support_brushes: HashMap::new(),
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
@@ -63,6 +67,7 @@ impl EditorWorld {
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
+            support_brushes: HashMap::new(),
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,

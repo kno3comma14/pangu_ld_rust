@@ -1,5 +1,6 @@
 use crate::core::geometry::CsgCompiler;
 use crate::core::world::{EditorMode, EditorWorld};
+use crate::tool::cancel_tool::CancelToolPlugin;
 use crate::tool::grab_tool::GrabToolPlugin;
 use crate::tool::rotation_tool::RotationToolPlugin;
 use crate::tool::scale_tool::ScaleToolPlugin;
@@ -31,6 +32,7 @@ impl Plugin for RenderEnginePlugin {
             .add_plugins(GrabToolPlugin)
             .add_plugins(ScaleToolPlugin)
             .add_plugins(RotationToolPlugin)
+            .add_plugins(CancelToolPlugin)
             .add_systems(Startup, setup_render_environment)
             .add_systems(Update, rebuild_dirty_world_system)
             .add_systems(Update, brush_hover_picking_system)

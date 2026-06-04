@@ -29,10 +29,9 @@ fn brush_selection_system(
     if let Some(hovered_entity) = hovered_query.iter().next() {
         if mouse_lclick_pressed && keyboard_lshift_pressed {
             if !selected_query.contains(hovered_entity) {
+                let idx = hovered_entity.index_u32() as usize;
                 commands.entity(hovered_entity).insert(SelectedBrush);
-                world_state
-                    .selected_brushes_indexes
-                    .push(hovered_entity.index_u32() as usize);
+                world_state.selected_brushes_indexes.push(idx);
                 commands.entity(hovered_entity).remove::<HoveredBrush>();
             } else {
                 commands.entity(hovered_entity).remove::<SelectedBrush>();
