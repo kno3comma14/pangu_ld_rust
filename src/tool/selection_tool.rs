@@ -32,6 +32,16 @@ fn brush_selection_system(
                 let idx = hovered_entity.index_u32() as usize;
                 commands.entity(hovered_entity).insert(SelectedBrush);
                 world_state.selected_brushes_indexes.push(idx);
+                if !world_state.support_brushes.contains_key(&idx) {
+                    let initial_manifold = world_state
+                        .brushes
+                        .iter()
+                        .find(|&b| b.brush_entity_id == idx)
+                        .map(|target_brush| target_brush.manifold.clone());
+                    if let Some(manifold) = initial_manifold {
+                        world_state.support_brushes.insert(idx, manifold);
+                    }
+                }
                 commands.entity(hovered_entity).remove::<HoveredBrush>();
             } else {
                 commands.entity(hovered_entity).remove::<SelectedBrush>();
@@ -41,6 +51,7 @@ fn brush_selection_system(
                     .position(|&x| x == hovered_entity.index_u32() as usize)
                 {
                     _ = world_state.selected_brushes_indexes.remove(idx);
+                    world_state.support_brushes.remove(&idx);
                 }
             }
         } else if mouse_lclick_pressed {
@@ -48,11 +59,22 @@ fn brush_selection_system(
                 commands.entity(entity).remove::<SelectedBrush>();
             }
             world_state.selected_brushes_indexes.clear();
+            world_state.support_brushes.clear();
 
+            let idx = hovered_entity.index_u32() as usize;
             commands.entity(hovered_entity).insert(SelectedBrush);
-            world_state
-                .selected_brushes_indexes
-                .push(hovered_entity.index_u32() as usize);
+            world_state.selected_brushes_indexes.push(idx);
+            if !world_state.support_brushes.contains_key(&idx) {
+                let initial_manifold = world_state
+                    .brushes
+                    .iter()
+                    .find(|&b| b.brush_entity_id == idx)
+                    .map(|target_brush| target_brush.manifold.clone());
+                if let Some(manifold) = initial_manifold {
+                    world_state.support_brushes.insert(idx, manifold);
+                }
+            }
+
             commands.entity(hovered_entity).remove::<HoveredBrush>();
         }
     } else {
@@ -61,6 +83,7 @@ fn brush_selection_system(
                 commands.entity(entity).remove::<SelectedBrush>();
             }
             world_state.selected_brushes_indexes.clear();
+            world_state.support_brushes.clear();
         }
     }
 }

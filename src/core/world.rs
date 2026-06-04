@@ -29,7 +29,7 @@ pub struct EditorWorld {
     pub base_manifold: Manifold,
     pub brushes: Vec<Brush>,
     pub selected_brushes_indexes: Vec<usize>,
-    pub support_brushes: HashMap<usize, Vec3>,
+    pub support_brushes: HashMap<usize, Manifold>,
     pub needs_rebuild: bool,
     pub grid_snap: f32,
     pub grid_height: f32,
