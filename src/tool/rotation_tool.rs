@@ -43,6 +43,7 @@ fn rotation_brush_system(
             return;
         }
         confirmed.0 = false;
+        world_state.grs_tool_confirmed = false;
         reference_rotation.0 = Quat::IDENTITY;
         pivote_position.0 = cursor_position;
         world_state.active_tool = EditorToolActive::Rotation;
@@ -53,6 +54,7 @@ fn rotation_brush_system(
     if space_pressed && world_state.active_tool == EditorToolActive::Rotation {
         confirmed.0 = true;
         world_state.support_brushes.clear();
+        world_state.grs_tool_confirmed = true;
         world_state.active_tool = EditorToolActive::Selection;
     }
 

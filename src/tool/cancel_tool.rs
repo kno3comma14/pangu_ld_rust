@@ -19,13 +19,10 @@ fn cancel_active_tool(
     mut world_state: ResMut<EditorWorld>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        let is_grs = [
-            EditorToolActive::Grabbing,
-            EditorToolActive::Rotation,
-            EditorToolActive::Scaling,
-        ]
-        .iter()
-        .any(|t| *t == world_state.active_tool);
+        let is_grs = matches!(
+            world_state.active_tool,
+            EditorToolActive::Grabbing | EditorToolActive::Rotation | EditorToolActive::Scaling
+        );
         if is_grs && !world_state.grs_tool_confirmed {
             let EditorWorld {
                 brushes,

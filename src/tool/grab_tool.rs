@@ -36,6 +36,7 @@ fn grab_brush_system(
             return;
         }
         confirmed.0 = false;
+        world_state.grs_tool_confirmed = false;
         g_position.0 = world_state.central_mouse_coords;
         world_state.active_tool = EditorToolActive::Grabbing;
     }
@@ -46,6 +47,7 @@ fn grab_brush_system(
     if space_pressed && grab_mode_activated.0 {
         confirmed.0 = true;
         world_state.support_brushes.clear();
+        world_state.grs_tool_confirmed = true;
         world_state.active_tool = EditorToolActive::Selection;
     }
 
