@@ -23,7 +23,7 @@ fn cancel_active_tool(
             world_state.active_tool,
             EditorToolActive::Grabbing | EditorToolActive::Rotation | EditorToolActive::Scaling
         );
-        if is_grs && !world_state.grs_tool_confirmed {
+        if is_grs {
             let EditorWorld {
                 brushes,
                 support_brushes,
@@ -41,7 +41,7 @@ fn cancel_active_tool(
                 }
             }
             support_brushes.clear();
-            *grs_tool_confirmed = false;
+            //*grs_tool_confirmed = false;
             *needs_rebuild = true;
             *active_tool = EditorToolActive::Selection;
         }
