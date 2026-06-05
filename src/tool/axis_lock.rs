@@ -70,29 +70,6 @@ pub fn restrict_transform(
                 scale,
             }
         }
-        (AxisLockType::X, TransformType::Rotation) => {
-            let rotation = t.rotation * Quat::from_vec4(Vec4::new(1.0, 0.0, 0.0, 1.0));
-            Transform {
-                translation: t.translation,
-                rotation,
-                scale: t.scale,
-            }
-        }
-        (AxisLockType::Y, TransformType::Rotation) => {
-            let rotation = t.rotation * Quat::from_vec4(Vec4::new(0.0, 1.0, 0.0, 1.0));
-            Transform {
-                translation: t.translation,
-                rotation,
-                scale: t.scale,
-            }
-        }
-        (AxisLockType::Z, TransformType::Rotation) => {
-            let rotation = t.rotation * Quat::from_vec4(Vec4::new(0.0, 0.0, 1.0, 1.0));
-            Transform {
-                translation: t.translation,
-                rotation,
-                scale: t.scale,
-            }
-        }
+        (_, TransformType::Rotation) => t,
     }
 }
