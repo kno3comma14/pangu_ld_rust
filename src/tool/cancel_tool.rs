@@ -40,7 +40,7 @@ fn cancel_active_tool(
                     br.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
                 }
             }
-            support_brushes.clear();
+            //support_brushes.clear();
             //*grs_tool_confirmed = false;
             *needs_rebuild = true;
             *active_tool = EditorToolActive::Selection;
