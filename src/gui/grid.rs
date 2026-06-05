@@ -41,11 +41,11 @@ fn mouse_grid_raycast_system(
     let snap = world_state.grid_snap;
 
     let mut height_changed = false;
-    if keyboard_input.just_pressed(KeyCode::KeyY) {
+    if keyboard_input.just_pressed(KeyCode::KeyI) {
         world_state.grid_height += snap;
         height_changed = true;
     }
-    if keyboard_input.just_pressed(KeyCode::KeyH) {
+    if keyboard_input.just_pressed(KeyCode::KeyK) {
         world_state.grid_height -= snap;
         height_changed = true;
     }

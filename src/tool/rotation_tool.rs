@@ -1,5 +1,7 @@
 use crate::core::world::EditorToolActive;
 use crate::core::world::EditorWorld;
+use crate::tool::axis_lock::AxisLockType;
+use crate::tool::axis_lock::TransformType;
 use crate::tool::selection_tool::SelectedBrush;
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
@@ -32,6 +34,8 @@ fn rotation_brush_system(
     mut reference_rotation: ResMut<RefRotation>,
     mut pivote_position: ResMut<PivotePosition>,
 ) {
+    let transform_type = TransformType::Rotation;
+    let mut axis_lock_type = AxisLockType::Global;
     let Ok(window) = window_query.single() else {
         return;
     };

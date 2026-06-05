@@ -1,5 +1,7 @@
 use crate::core::world::EditorToolActive;
 use crate::core::world::EditorWorld;
+use crate::tool::axis_lock::AxisLockType;
+use crate::tool::axis_lock::TransformType;
 use crate::tool::selection_tool::SelectedBrush;
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
@@ -31,6 +33,8 @@ fn grab_brush_system(
     mut grab_mode_activated: ResMut<GrabModeActivated>,
     mut confirmed: ResMut<Confirmed>,
 ) {
+    let transform_type = TransformType::Translation;
+    let mut axis_lock_type = AxisLockType::Global;
     if keyboard_input.just_pressed(KeyCode::KeyG) {
         if selected_query.is_empty() {
             return;
