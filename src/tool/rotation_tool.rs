@@ -13,12 +13,15 @@ pub struct RefRotation(pub Quat);
 pub struct Confirmed(pub bool);
 #[derive(Resource)]
 pub struct PivotePosition(pub Vec2);
+#[derive(Resource)]
+pub struct AxisLock(pub AxisLockType);
 
 pub struct RotationToolPlugin;
 
 impl Plugin for RotationToolPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Confirmed(false))
+            .insert_resource(AxisLock(AxisLockType::Global))
             .insert_resource(RefRotation(Quat::IDENTITY))
             .insert_resource(PivotePosition(Vec2::ZERO))
             .add_systems(Update, rotation_brush_system);
@@ -33,9 +36,9 @@ fn rotation_brush_system(
     mut confirmed: ResMut<Confirmed>,
     mut reference_rotation: ResMut<RefRotation>,
     mut pivote_position: ResMut<PivotePosition>,
+    mut al: ResMut<AxisLock>,
 ) {
     let transform_type = TransformType::Rotation;
-    let mut axis_lock_type = AxisLockType::Global;
     let Ok(window) = window_query.single() else {
         return;
     };
@@ -57,6 +60,7 @@ fn rotation_brush_system(
 
     if space_pressed && world_state.active_tool == EditorToolActive::Rotation {
         confirmed.0 = true;
+        al.0 = AxisLockType::Global;
         world_state.support_brushes.clear();
         for entity in selected_query {
             let idx = entity.index_u32() as usize;
@@ -74,6 +78,15 @@ fn rotation_brush_system(
     }
 
     if world_state.active_tool == EditorToolActive::Rotation && !confirmed.0 {
+        if keyboard_input.just_pressed(KeyCode::KeyX) {
+            al.0 = AxisLockType::X;
+        } else if keyboard_input.just_pressed(KeyCode::KeyY) {
+            al.0 = AxisLockType::Y;
+        } else if keyboard_input.just_pressed(KeyCode::KeyZ) {
+            al.0 = AxisLockType::Z;
+        } else if keyboard_input.just_pressed(KeyCode::Escape) {
+            al.0 = AxisLockType::Global;
+        }
         let total_mouse_delta = cursor_position - pivote_position.0;
         let y_rotation = Quat::from_rotation_y(total_mouse_delta.y * 0.05);
 

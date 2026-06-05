@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AxisLockType {
     Global,
     X,
@@ -7,6 +8,7 @@ pub enum AxisLockType {
     Z,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TransformType {
     Translation,
     Rotation,
@@ -45,7 +47,7 @@ pub fn restrict_transform(
             }
         }
         (AxisLockType::X, TransformType::Scale) => {
-            let scale = t.scale * Vec3::new(1.0, 0.0, 0.0);
+            let scale = Vec3::new(t.scale.x, 1.0, 1.0);
             Transform {
                 translation: t.translation,
                 rotation: t.rotation,
@@ -53,7 +55,7 @@ pub fn restrict_transform(
             }
         }
         (AxisLockType::Y, TransformType::Scale) => {
-            let scale = t.scale * Vec3::new(0.0, 1.0, 0.0);
+            let scale = Vec3::new(1.0, t.scale.y, 1.0);
             Transform {
                 translation: t.translation,
                 rotation: t.rotation,
@@ -61,7 +63,7 @@ pub fn restrict_transform(
             }
         }
         (AxisLockType::Z, TransformType::Scale) => {
-            let scale = t.scale * Vec3::new(0.0, 0.0, 1.0);
+            let scale = Vec3::new(1.0, 1.0, t.scale.z);
             Transform {
                 translation: t.translation,
                 rotation: t.rotation,
