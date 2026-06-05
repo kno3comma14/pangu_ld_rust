@@ -1,4 +1,4 @@
-use crate::core::world::{EditorMode, EditorWorld};
+use crate::core::world::{EditorMode, EditorToolActive, EditorWorld};
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
@@ -15,7 +15,10 @@ fn switch_editor_mode(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut world_state: ResMut<EditorWorld>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Tab) {
+    let can_switch = world_state.active_tool == EditorToolActive::Add
+        || world_state.active_tool == EditorToolActive::Selection;
+
+    if keyboard_input.just_pressed(KeyCode::Tab) && can_switch {
         match world_state.editor_mode {
             EditorMode::WorkshopMode => {
                 world_state.editor_mode = EditorMode::ManifoldMode;
