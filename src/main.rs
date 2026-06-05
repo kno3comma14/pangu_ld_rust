@@ -66,7 +66,7 @@ fn setup_editor_workspace(mut commands: Commands) {
             mouse_key_cursor_grab: MouseButton::Right,
             walk_speed: 25.0,
             run_speed: 50.0,
-            sensitivity: 2.0,
+            sensitivity: 1.0,
             scroll_factor: 0.0,
             ..default()
         },
