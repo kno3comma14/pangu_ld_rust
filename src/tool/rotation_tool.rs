@@ -43,6 +43,7 @@ fn rotation_brush_system(
             return;
         }
         confirmed.0 = false;
+        world_state.grs_tool_confirmed = false;
         reference_rotation.0 = Quat::IDENTITY;
         pivote_position.0 = cursor_position;
         world_state.active_tool = EditorToolActive::Rotation;
@@ -52,6 +53,20 @@ fn rotation_brush_system(
 
     if space_pressed && world_state.active_tool == EditorToolActive::Rotation {
         confirmed.0 = true;
+        world_state.support_brushes.clear();
+        for entity in selected_query {
+            let idx = entity.index_u32() as usize;
+            if let Some(mani) = world_state
+                .brushes
+                .iter()
+                .find(|br| br.brush_entity_id == idx)
+                .map(|item| item.manifold.clone())
+            {
+                world_state.support_brushes.insert(idx, mani);
+            }
+        }
+        world_state.grs_tool_confirmed = true;
+        world_state.active_tool = EditorToolActive::Selection;
     }
 
     if world_state.active_tool == EditorToolActive::Rotation && !confirmed.0 {
