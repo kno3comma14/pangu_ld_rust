@@ -44,6 +44,7 @@ fn scale_brush_system(
             return;
         }
         confirmed.0 = false;
+        world_state.grs_tool_confirmed = false;
         reference_scale.0 = Vec3::ONE;
         pivote_position.0 = cursor_position;
         world_state.active_tool = EditorToolActive::Scaling;
@@ -53,6 +54,20 @@ fn scale_brush_system(
 
     if space_pressed && world_state.active_tool == EditorToolActive::Scaling {
         confirmed.0 = true;
+        world_state.grs_tool_confirmed = true;
+        world_state.support_brushes.clear();
+        for entity in selected_query {
+            let idx = entity.index_u32() as usize;
+            if let Some(mani) = world_state
+                .brushes
+                .iter()
+                .find(|br| br.brush_entity_id == idx)
+                .map(|item| item.manifold.clone())
+            {
+                world_state.support_brushes.insert(idx, mani);
+            }
+        }
+        world_state.active_tool = EditorToolActive::Selection;
     }
 
     if world_state.active_tool == EditorToolActive::Scaling && !confirmed.0 {

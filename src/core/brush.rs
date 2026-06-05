@@ -27,16 +27,16 @@ pub enum BrushPrimitive {
         segments: i32,
     },
 
-    Torus {
+    _Torus {
         major_radius: f32,
         minor_radius: f32,
         segments: i32,
     },
 
-    Tetrahedron,
+    _Tetrahedron,
 
-    World,
-    Empty,
+    _World,
+    _Empty,
 }
 
 #[derive(Component, Clone)]
@@ -53,9 +53,7 @@ impl std::fmt::Debug for Brush {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Brush")
             .field("base_primitive", &self.base_primitive)
-            // Manifold also doesn't implement Debug, so print a placeholder
             .field("manifold", &"<Manifold Opaque Handle>")
-            // Print structural stats for MeshGL instead of raw data
             .field(
                 "cached_meshgl",
                 &format!("MeshGL (num_triangles: {})", self.cached_meshgl.num_tri()),
@@ -91,7 +89,7 @@ impl Brush {
                 height,
                 segments,
             } => Manifold::cylinder(height as f64, radius as f64, 0.0, segments, true),
-            BrushPrimitive::Torus {
+            BrushPrimitive::_Torus {
                 major_radius,
                 minor_radius,
                 segments,
@@ -101,10 +99,9 @@ impl Brush {
                 let torus = Manifold::revolve(&offset_circle, segments, 360.0);
                 torus
             }
-            BrushPrimitive::World => Manifold::empty(),
-            BrushPrimitive::Empty => Manifold::empty(),
-            BrushPrimitive::Tetrahedron => Manifold::tetrahedron(),
-            _ => Manifold::empty(),
+            BrushPrimitive::_World => Manifold::empty(),
+            BrushPrimitive::_Empty => Manifold::empty(),
+            BrushPrimitive::_Tetrahedron => Manifold::tetrahedron(),
         };
         let affine = geometry::bevy_transform_to_affine(transform);
         m = m.transform(&affine);

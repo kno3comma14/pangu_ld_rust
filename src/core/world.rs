@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::core::{
     brush::{self, Brush},
     geometry,
@@ -23,10 +25,12 @@ pub enum EditorMode {
 #[derive(Resource, Debug, Clone)]
 pub struct EditorWorld {
     pub active_tool: EditorToolActive,
+    pub grs_tool_confirmed: bool,
     pub add_brush_mode: OpType,
     pub base_manifold: Manifold,
     pub brushes: Vec<Brush>,
     pub selected_brushes_indexes: Vec<usize>,
+    pub support_brushes: HashMap<usize, Manifold>,
     pub needs_rebuild: bool,
     pub grid_snap: f32,
     pub grid_height: f32,
@@ -39,11 +43,13 @@ impl Default for EditorWorld {
     fn default() -> Self {
         Self {
             active_tool: EditorToolActive::Add,
+            grs_tool_confirmed: false,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
+            support_brushes: HashMap::new(),
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
@@ -58,11 +64,13 @@ impl EditorWorld {
     pub fn new() -> Self {
         Self {
             active_tool: EditorToolActive::Add,
+            grs_tool_confirmed: false,
             add_brush_mode: OpType::Add,
             base_manifold: Manifold::empty()
                 .transform(&geometry::bevy_transform_to_affine(Transform::IDENTITY)),
             brushes: Vec::new(),
             selected_brushes_indexes: Vec::new(),
+            support_brushes: HashMap::new(),
             needs_rebuild: true,
             grid_snap: 1.0,
             grid_height: 0.0,
@@ -82,7 +90,7 @@ impl EditorWorld {
         self.brushes.push(aux_brush);
     }
 
-    pub fn remove_brush(&mut self, index: usize) {
+    pub fn _remove_brush(&mut self, index: usize) {
         if index < self.brushes.len() {
             self.brushes.remove(index);
 
@@ -91,7 +99,7 @@ impl EditorWorld {
         }
     }
 
-    pub fn swap_brush_order(&mut self, index_a: usize, index_b: usize) {
+    pub fn _swap_brush_order(&mut self, index_a: usize, index_b: usize) {
         if index_a < self.brushes.len() && index_b < self.brushes.len() {
             self.brushes.swap(index_a, index_b);
             self.needs_rebuild = true;
