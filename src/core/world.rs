@@ -90,7 +90,7 @@ impl EditorWorld {
         self.brushes.push(aux_brush);
     }
 
-    pub fn remove_brush(&mut self, index: usize) {
+    pub fn _remove_brush(&mut self, index: usize) {
         if index < self.brushes.len() {
             self.brushes.remove(index);
 
@@ -99,7 +99,7 @@ impl EditorWorld {
         }
     }
 
-    pub fn swap_brush_order(&mut self, index_a: usize, index_b: usize) {
+    pub fn _swap_brush_order(&mut self, index_a: usize, index_b: usize) {
         if index_a < self.brushes.len() && index_b < self.brushes.len() {
             self.brushes.swap(index_a, index_b);
             self.needs_rebuild = true;

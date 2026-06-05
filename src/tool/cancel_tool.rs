@@ -1,5 +1,4 @@
 use crate::core::world::{EditorToolActive, EditorWorld};
-use crate::tool::selection_tool::SelectedBrush;
 use bevy::app::Plugin;
 use bevy::input::ButtonInput;
 use bevy::input::keyboard::KeyCode;
@@ -27,7 +26,6 @@ fn cancel_active_tool(
             let EditorWorld {
                 brushes,
                 support_brushes,
-                grs_tool_confirmed,
                 active_tool,
                 needs_rebuild,
                 ..
@@ -40,8 +38,6 @@ fn cancel_active_tool(
                     br.cached_meshgl = MeshGL::new(&vert_props, n_props, &tri_indices);
                 }
             }
-            //support_brushes.clear();
-            //*grs_tool_confirmed = false;
             *needs_rebuild = true;
             *active_tool = EditorToolActive::Selection;
         }

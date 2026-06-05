@@ -94,7 +94,7 @@ fn update_mesh_geometry(bevy_mesh: &mut Mesh, mesh_gl: &manifold_csg::MeshGL) {
     let _ = bevy_mesh.compute_flat_normals();
 }
 
-fn clear_mesh_geometry(bevy_mesh: &mut Mesh) {
+fn _clear_mesh_geometry(bevy_mesh: &mut Mesh) {
     bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_POSITION);
     bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_NORMAL);
     bevy_mesh.remove_attribute(Mesh::ATTRIBUTE_UV_0);
@@ -279,7 +279,6 @@ fn visual_highlight_system(
         (&MeshMaterial3d<StandardMaterial>, &WorkshopBrushMarker),
         (Without<HoveredBrush>, Without<SelectedBrush>),
     >,
-    world_state: Res<EditorWorld>,
 ) {
     for material_handle in &selected_brush_query {
         if let Some(material) = materials.get_mut(&material_handle.0) {
